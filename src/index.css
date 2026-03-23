@@ -30,6 +30,8 @@
   src: url(/fonts/playfair-regular.woff2) format("woff2");
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /*  reference color
   primary:#FFFDD0 
@@ -150,6 +152,11 @@
 }
 
 @layer base {
+  html {
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
   * {
     @apply scroll-smooth font-poppins;
   }
