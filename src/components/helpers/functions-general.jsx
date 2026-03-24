@@ -268,7 +268,8 @@ export const GetFocus = (id) => {
 export const getUserType = () => {
   const { store } = React.useContext(StoreContext);
 
-  let link = `${devNavUrl}/${store.credentials?.data?.role_name.toLowerCase()}`;
+  // let link = `${devNavUrl}/${store.credentials?.data?.role_name.toLowerCase()}`;
+  let link = "developer";
 
   return link;
 };
