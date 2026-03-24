@@ -1,12 +1,14 @@
 import { setError } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import { useField } from "formik";
-import { Check, CircleCheck } from "lucide-react";
 import React from "react";
+import { FaCheck } from "react-icons/fa";
+import { FaCircleCheck } from "react-icons/fa6";
 import { NumericFormat } from "react-number-format";
+import { isEmptyItem } from "./functions-general";
 
 export const InputTextArea = ({
-  label,
+  label = "",
   required = true,
   onChange = null,
   className = "",
@@ -17,10 +19,12 @@ export const InputTextArea = ({
 
   return (
     <>
-      <label htmlFor={props.id || props.name}>
-        {required && <span className="text-alert">*</span>}
-        {label}
-      </label>
+      {label !== "" && (
+        <label htmlFor={props.id || props.name}>
+          {required && <span className="text-alert">*</span>}
+          {label}
+        </label>
+      )}
       <textarea
         className={
           meta.touched && meta.error ? `error-show ${className}` : className
@@ -51,7 +55,6 @@ export const InputText = ({
 }) => {
   const { dispatch } = React.useContext(StoreContext);
   const [field, meta] = useField(props);
-  const errorArray = Array.isArray(meta.error);
 
   if (props.number === "number") {
     return (
@@ -68,7 +71,7 @@ export const InputText = ({
           allowLeadingZeros
           autoComplete="off"
           className={`${
-            meta.touched && meta.error && !errorArray ? "error-show" : null
+            meta.touched && meta.error ? "error-show" : null
           }  ${className}`}
           onChange={(e) => {
             onChange !== null && onChange(e);
@@ -77,10 +80,8 @@ export const InputText = ({
           }}
         />
 
-        {meta.touched && meta.error && !errorArray ? (
-          <span className={`error-show`}>
-            {errorArray ? "asd" : meta.error}
-          </span>
+        {meta.touched && meta.error ? (
+          <span className={`error-show`}>{meta.error}</span>
         ) : null}
       </>
     );
@@ -92,7 +93,7 @@ export const InputText = ({
         {...field}
         {...props}
         className={`${
-          meta.touched && meta.error && !errorArray ? `error-show ` : ""
+          meta.touched && meta.error ? `error-show ` : ""
         } ${className} `}
         autoComplete="off"
         onChange={(e) => {
@@ -108,7 +109,7 @@ export const InputText = ({
         </label>
       )}
 
-      {meta.touched && meta.error && !errorArray ? (
+      {meta.touched && meta.error ? (
         <span className="error-show">{meta.error}</span>
       ) : null}
     </>
@@ -176,13 +177,18 @@ export const InputFileUpload = ({ label, ...props }) => {
   );
 };
 
-export const InputCheckbox = ({ label, onChange = null, ...props }) => {
+export const InputCheckbox = ({
+  label,
+  onChange = null,
+  required = false,
+  ...props
+}) => {
   const { dispatch } = React.useContext(StoreContext);
   const [field, meta] = useField(props);
   return (
     <>
       <div className="flex items-center gap-2">
-        <span
+        <div
           className="relative flex cursor-pointer items-center justify-center rounded-full"
           htmlFor={props.id || props.name}
         >
@@ -204,17 +210,18 @@ export const InputCheckbox = ({ label, onChange = null, ...props }) => {
             }}
           />
           <span className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
-            <Check className="h-3 w-3" />
+            <FaCheck className="h-3 w-3" />
           </span>
-        </span>
+        </div>
 
         <label
           htmlFor={props.id || props.name}
           className={`${
             meta.touched && meta.error ? "w-auto h-auto error-show" : ""
-          } cursor-pointer -bottom-2 m-0 -translate-y-4 left-6`}
+          } cursor-pointer -bottom-2 m-0 -translate-y-4 relative`}
         >
           {label}
+          {required && <span className="text-alert">*</span>}
         </label>
       </div>
     </>
@@ -247,7 +254,7 @@ export const InputRadioButton = ({ label, onChange = null, ...props }) => {
             }}
           />
           <div className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-accent opacity-0 transition-opacity peer-checked:opacity-100 peer-hover:opacity-100">
-            <CircleCheck className="h-3.5 w-3.5 fill-current" />
+            <FaCircleCheck className="h-3.5 w-3.5 fill-current" />
           </div>
         </span>
 
@@ -257,6 +264,83 @@ export const InputRadioButton = ({ label, onChange = null, ...props }) => {
         >
           {label}
         </label>
+      </div>
+    </>
+  );
+};
+
+export const InputCode = ({ length, loading, onComplete }) => {
+  const [code, setCode] = React.useState([...Array(length)].map(() => ""));
+  const inputs = React.useRef([]);
+
+  const processInput = (e, slot) => {
+    const num = e.target.value;
+    if (/[^0-9]/.test(num)) return;
+
+    let valCodeLength = isEmptyItem(e.target.value, "").length;
+    let newCode = [...code];
+    if (Number(valCodeLength) > 1) {
+      newCode = [...Array(6)].map(() => "");
+      for (let i = 0; i < Number(valCodeLength); i++) {
+        if (i <= 5) {
+          newCode[i] = num[i];
+        }
+      }
+      setCode(newCode);
+      if (num?.length - 1 !== length) {
+        if (num?.length < 6) {
+          inputs.current[num?.length].focus();
+        } else {
+          inputs.current[num?.length - 1].focus();
+        }
+      }
+      if (newCode.every((num) => num !== "")) {
+        onComplete(newCode.join(""));
+      }
+    } else {
+      newCode[slot] = num;
+      setCode(newCode);
+      if (slot !== length - 1) {
+        inputs.current[slot + 1].focus();
+      }
+      if (newCode.every((num) => num !== "")) {
+        onComplete(newCode.join(""));
+      }
+    }
+  };
+
+  const onKeyUp = (e, slot) => {
+    if (e.keyCode === 8 && !code[slot] && slot !== 0) {
+      const newCode = [...code];
+      newCode[slot - 1] = "";
+      setCode(newCode);
+      inputs.current[slot - 1].focus();
+    }
+  };
+
+  return (
+    <>
+      <div className="">
+        <div className="flex gap-x-3  ">
+          {code.map((num, idx) => {
+            return (
+              <input
+                key={idx}
+                type="text"
+                inputMode="numeric"
+                value={num}
+                autoFocus={!code[0].length && idx === 0}
+                readOnly={loading}
+                disabled={loading}
+                onChange={(e) => processInput(e, idx)}
+                onKeyUp={(e) => onKeyUp(e, idx)}
+                ref={(ref) => inputs.current.push(ref)}
+                placeholder="⚬"
+                className="block w-9.5 text-center border-gray-200 rounded-md sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+              />
+            );
+          })}
+        </div>
       </div>
     </>
   );
