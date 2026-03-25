@@ -1,6 +1,4 @@
-import Header from "@/layout/Header";
-import NavigationFullWidth from "@/layout/navigation/NavigationFullWidth";
-import Navigations from "@/layout/navigation/Navigations";
+import DeveloperHeaderNav from "@/layout/developer/DeveloperHeaderNav";
 import { StoreContext } from "@/store/StoreContext";
 import { LayoutSettings } from "lucide-react";
 import React from "react";
@@ -9,14 +7,7 @@ const Settings = () => {
 
   return (
     <>
-      <Navigations menu="settings" />
-      <NavigationFullWidth menu="settings" />
-      <Header />
-      <div
-        className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out ${
-          store.isNavFullShow ? " pl-12 " : " pl-[220px] "
-        } sm:pr-6 pr-0`}
-      >
+      <DeveloperHeaderNav>
         <div className="my-2 sm:pr-0 pr-6 bg-pink-500">
           <div className="flex items-center justify-between ">
             <h4 className="text-base ">Settings</h4>
@@ -25,7 +16,7 @@ const Settings = () => {
             </h1>
           </div>
         </div>
-      </div>
+      </DeveloperHeaderNav>
     </>
   );
 };
