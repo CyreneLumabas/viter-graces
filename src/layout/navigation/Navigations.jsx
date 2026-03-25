@@ -1,12 +1,12 @@
-import { getUserType } from "@/components/helpers/functions-general";
 import { StoreContext } from "@/store/StoreContext";
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { getNavList } from "./function-nav";
-import LogoSm from "../svg/LogoSm";
-import LogoLg from "../svg/LogoLg";
+import LogoSm from "../../assets/svg/LogoSm";
+import LogoLg from "../../assets/svg/LogoLg";
 import { setIsNavFullShow } from "@/store/StoreAction";
 import { ChevronRight } from "lucide-react";
+import { getUserType } from "@/utilities/GetUserType";
 
 const Navigations = ({ menu, submenu }) => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -50,10 +50,6 @@ const Navigations = ({ menu, submenu }) => {
   const handleHoverBoxLeave = () => {
     setHoverItem(null);
   };
-  const getCurrentYear = () => {
-    return new Date().getFullYear();
-  };
-
   const handleShowNavigation = () => {
     dispatch(setIsNavFullShow(!store.isNavFullShow));
   };

@@ -1,6 +1,4 @@
-import {
-  setIsSearch
-} from "@/store/StoreAction";
+import { setIsSearch } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import {
   ChartColumn,

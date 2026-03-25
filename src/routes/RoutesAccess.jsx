@@ -1,5 +1,5 @@
-import { devNavUrl } from "@/components/helpers/functions-general";
-import Dashboard from "@/pages/dashboard/Dashboard";
+import { devNavUrl } from "@/config/config";
+import Dashboard from "@/pages/developer/dashboard/Dashboard";
 
 export const routesAccess = [
   {

@@ -1,4 +1,4 @@
-import PageNotFound from "@/components/partials/PageNotFound";
+import PageNotFound from "@/layout/PageNotFound";
 import { StoreProvider } from "@/store/StoreContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";

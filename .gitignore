@@ -13,12 +13,11 @@ dist-ssr
 *.local
 
 #API
-rest/v1/notifications/PHPMailer
-rest/v1/jwt
-rest/v1/recaptcha
-rest/v1/notification/html
-rest/v1/google-api
+rest/v1/lib  
+rest/v1/files-api-key
+rest/v1/core/env.php
 apikey.php
+.env
 
 # Editor directories and files
 .vscode/*

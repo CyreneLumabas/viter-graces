@@ -1,6 +1,4 @@
-import Header from "@/components/partials/Header";
-import NavigationFullWidth from "@/components/partials/navigation/NavigationFullWidth";
-import Navigations from "@/components/partials/navigation/Navigations";
+import DeveloperHeaderNav from "@/layout/developer/DeveloperHeaderNav";
 import { StoreContext } from "@/store/StoreContext";
 import { LayoutDashboard } from "lucide-react";
 import React from "react";
@@ -9,14 +7,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <Navigations menu="dashboard" />
-      <NavigationFullWidth menu="dashboard" />
-      <Header />
-      <div
-        className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out ${
-          store.isNavFullShow ? " pl-12 " : " pl-[220px] "
-        } sm:pr-6 pr-0`}
-      >
+      <DeveloperHeaderNav>
         <div className="my-2 sm:pr-0 pr-6 bg-pink-500">
           <div className="flex items-center justify-between ">
             <h4 className="text-base ">Dashboard</h4>
@@ -25,7 +16,7 @@ const Dashboard = () => {
             </h1>
           </div>
         </div>
-      </div>
+      </DeveloperHeaderNav>
     </>
   );
 };

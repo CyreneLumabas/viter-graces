@@ -1,4 +1,3 @@
-import { getUserType } from "@/components/helpers/functions-general";
 import {
   setError,
   setIsNavFullShow,
@@ -10,8 +9,9 @@ import { StoreContext } from "@/store/StoreContext";
 import { Bolt, ChevronRight } from "lucide-react";
 import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
-import LogoLg from "../svg/LogoLg";
+import LogoLg from "../../assets/svg/LogoLg";
 import { getNavList } from "./function-nav";
+import { getUserType } from "@/utilities/GetUserType";
 
 const NavigationFullWidth = ({ menu, submenu = null }) => {
   const { store, dispatch } = React.useContext(StoreContext);

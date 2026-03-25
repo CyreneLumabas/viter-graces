@@ -4,13 +4,13 @@ use \Firebase\JWT\JWT;
 
 require "Database.php";
 require "Response.php";
+require "env.php";
 
 function checkApiKey()
 {
     // validate apikey
     http_response_code(200);
-    $apiKey = require __DIR__ . '/../../../apikey.php';
-    // $apiKey = require $_SERVER["DOCUMENT_ROOT"] . '/../../apikey.php';
+    $apiKey = WEB_APP_API_KEY;
     $auth_array = explode(" ", $_SERVER['HTTP_AUTHORIZATION']);
     $un_pw = explode(":", base64_decode($auth_array[1]));
     $un = $un_pw[0];
