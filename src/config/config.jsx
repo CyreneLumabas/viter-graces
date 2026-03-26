@@ -1,21 +1,23 @@
-export const urlPath = import.meta.env.VITE_DEV_BASE_URL;
-export const urlPathGRACES = import.meta.env.VITE_URL_WEBSITE_PATH;
-export const apiVersion = import.meta.env.VITE_API_VERSION;
+export const urlPath = import.meta.env.VITE_APP_DEV_BASE_URL;
+export const urlPathGRACES = import.meta.env.VITE_APP_DEV_URL_WEBSITE_PATH;
+export const apiVersion = import.meta.env.VITE_APP_DEV_API_VERSION;
 
-export const devApiUrl = import.meta.env.VITE_DEV_API_URL || "";
-export const devBaseImgUrl = import.meta.env.VITE_DEV_BASE_IMG_URL;
-export const devBaseUrl = import.meta.env.VITE_DEV_BASE_URL;
-export const devWebUrl = import.meta.env.VITE_VITE_APP_ROOT;
-export const devNavUrl = import.meta.env.VITE_DEV_NAV_URL;
+export const devApiUrl = import.meta.env.VITE_APP_DEV_API_URL || "";
+export const devBaseImgUrl = import.meta.env.VITE_APP_DEV_BASE_IMG_URL;
+export const devBaseUrl = import.meta.env.VITE_APP_DEV_BASE_URL;
+export const devWebUrl = import.meta.env.VITE_APP_DEV_VITE_APP_DEV_APP_ROOT;
+export const devNavUrl = import.meta.env.VITE_APP_DEV_NAV_URL;
 
-export const setTimeZone = import.meta.env.VITE_TIME_ZONE;
-export const UrlDeveloper = import.meta.env.VITE_URL_DEVELOPER;
+export const setTimeZone = import.meta.env.VITE_APP_DEV_TIME_ZONE;
+export const UrlDeveloper = import.meta.env.VITE_APP_DEV_URL_DEVELOPER;
 export const isDemoMode = 0;
-export const googleThumbnailLink = import.meta.env.VITE_GOOGLE_THUMBNAIL_LINK;
-export const googleHDViewLink = import.meta.env.VITE_GOOGLE_HD_VIEW_LINK;
-export const googleViewLink = import.meta.env.VITE_GOOGLE_VIEW_LINK;
+export const googleThumbnailLink = import.meta.env
+  .VITE_APP_DEV_GOOGLE_THUMBNAIL_LINK;
+export const googleHDViewLink = import.meta.env
+  .VITE_APP_DEV_GOOGLE_HD_VIEW_LINK;
+export const googleViewLink = import.meta.env.VITE_APP_DEV_GOOGLE_VIEW_LINK;
 
-export const devKey = import.meta.env.VITE_DEV_KEY;
+export const devKey = import.meta.env.VITE_APP_DEV_KEY;
 
 // reCAPTCHA site key TEST
-export const siteKey = import.meta.env.VITE_GOOGLE_RECAPTHA_SITE_KEY;
+export const siteKey = import.meta.env.VITE_APP_DEV_GOOGLE_RECAPTHA_SITE_KEY;

@@ -18,6 +18,7 @@ rest/v1/files-api-key
 rest/v1/core/env.php
 apikey.php
 .env
+.env.production
 
 # Editor directories and files
 .vscode/*
