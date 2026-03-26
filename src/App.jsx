@@ -27,8 +27,8 @@ const App = () => {
               })}
             </Routes>
           </Router>
-        </StoreProvider>{" "}
-      </QueryClientProvider>{" "}
+        </StoreProvider>
+      </QueryClientProvider>
     </>
   );
 };
