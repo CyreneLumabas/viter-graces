@@ -1,4 +1,4 @@
-import DeveloperHeaderNav from "@/layout/developer/DeveloperHeaderNav";
+import HeaderNav from "@/layout/HeaderNav";
 import { StoreContext } from "@/store/StoreContext";
 import { LayoutSettings } from "lucide-react";
 import React from "react";
@@ -7,7 +7,7 @@ const Settings = () => {
 
   return (
     <>
-      <DeveloperHeaderNav>
+      <HeaderNav>
         <div className="my-2 sm:pr-0 pr-6 bg-pink-500">
           <div className="flex items-center justify-between ">
             <h4 className="text-base ">Settings</h4>
@@ -16,7 +16,7 @@ const Settings = () => {
             </h1>
           </div>
         </div>
-      </DeveloperHeaderNav>
+      </HeaderNav>
     </>
   );
 };
