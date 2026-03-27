@@ -54,10 +54,7 @@ const ForgotPassword = () => {
   };
 
   const yupSchema = Yup.object({
-    user_other_email: Yup.string()
-      .trim()
-      .required("Required")
-      .email("Invalid email"),
+    user_other_email: Yup.string().trim().email("Invalid email"),
     password: Yup.string().trim().required("Required"),
   });
 
@@ -111,7 +108,7 @@ const ForgotPassword = () => {
                     </div>
 
                     {store.error && (
-                      <div className="bg-red-50 p-2 rounded-sm mb-3 border-b border-b-red-600">
+                      <div className="bg-light p-2 rounded-sm mb-3 border-b border-b-red-600">
                         <p className="m-0 text-red-600">
                           Invalid email.
                           <br />
@@ -137,7 +134,7 @@ const ForgotPassword = () => {
             <p className="mt-4 text-xs text-white text-right ">
               Back to{" "}
               <Link
-                className="cursor-pointer hover:text-accent-light underline"
+                className="cursor-pointer hover:text-secondary underline"
                 to={`${devNavUrl}/`}
               >
                 login

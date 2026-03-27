@@ -54,11 +54,8 @@ const Login = () => {
   };
 
   const yupSchema = Yup.object({
-    user_other_email: Yup.string()
-      .trim()
-      .required("Required")
-      .email("Invalid email"),
-    password: Yup.string().trim().required("Required"),
+    user_other_email: Yup.string().trim().email("Invalid email"),
+    password: Yup.string().trim(),
   });
 
   React.useEffect(() => {
@@ -100,7 +97,7 @@ const Login = () => {
                   <Form className="text-sm mt-8">
                     <div className="relative mb-5">
                       <InputLogin
-                        placeholder="USERNAME / EMAIL"
+                        placeholder="EMAIL"
                         icon={<User className="text-white" />}
                         type="text"
                         name="user_other_email"
@@ -128,7 +125,7 @@ const Login = () => {
                     </div>
 
                     {store.error && (
-                      <div className="bg-red-50 p-2 rounded-sm mb-3 border-b border-b-red-600">
+                      <div className="bg-light p-2 rounded-sm mb-3 border-b border-b-red-600">
                         <p className="m-0 text-red-600">
                           Invalid email or password.
                           <br />
@@ -154,7 +151,7 @@ const Login = () => {
             </Formik>
             <p className="mt-4 text-xs text-white text-right ">
               <Link
-                className="cursor-pointer hover:text-accent-light"
+                className="cursor-pointer hover:text-secondary"
                 to={`${devNavUrl}/forgot-password`}
               >
                 Forgot password?
