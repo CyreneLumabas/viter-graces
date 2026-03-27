@@ -129,7 +129,7 @@ const ResetPassword = () => {
               <LogoFull />
             </div>
 
-            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white ">
+            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white font-inter-bold">
               Reset password
             </p>
             <small className="uppercase text-gray-300">

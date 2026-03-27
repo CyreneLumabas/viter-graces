@@ -1,6 +1,6 @@
 import { devNavUrl } from "@/config/config";
 import Dashboard from "@/pages/developer/dashboard/Dashboard";
-import { Settings } from "lucide-react";
+import Settings from "@/pages/developer/settings/Settings";
 
 export const routesDeveloper = [
   {

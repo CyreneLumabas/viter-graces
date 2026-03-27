@@ -77,7 +77,7 @@ const ForgotPassword = () => {
               <LogoFull />
             </div>
 
-            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white ">
+            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white font-inter-bold">
               forgot password?
             </p>
             <small className="uppercase text-gray-300">
@@ -134,7 +134,7 @@ const ForgotPassword = () => {
             <p className="mt-4 text-xs text-white text-right ">
               Back to{" "}
               <Link
-                className="cursor-pointer hover:text-secondary underline"
+                className="cursor-pointer hover:text-accent-light underline font-inter-regular"
                 to={`${devNavUrl}/`}
               >
                 login
