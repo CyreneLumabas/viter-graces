@@ -80,7 +80,7 @@ const Login = () => {
               <LogoFull />
             </div>
 
-            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white ">
+            <p className="mt-8 mb-0 text-xl uppercase text-white font-inter-bold font-bold">
               LOG IN
             </p>
             <small className="uppercase text-gray-300">
@@ -152,9 +152,9 @@ const Login = () => {
                 );
               }}
             </Formik>
-            <p className="mt-4 text-xs text-white text-right ">
+            <p className="mt-4 text-xs text-white text-right  ">
               <Link
-                className="cursor-pointer hover:text-accent-light"
+                className="cursor-pointer hover:text-accent-light font-inter-regular"
                 to={`${devNavUrl}/forgot-password`}
               >
                 Forgot password?

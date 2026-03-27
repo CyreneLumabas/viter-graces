@@ -129,7 +129,7 @@ const CreatePassword = () => {
               <LogoFull />
             </div>
 
-            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white ">
+            <p className="mt-8 mb-0 text-lg font-bold uppercase text-white font-inter-bold ">
               create password
             </p>
             <small className="uppercase text-gray-300">

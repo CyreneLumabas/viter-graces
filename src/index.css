@@ -151,6 +151,9 @@
   p {
     @apply mb-2;
   }
+  small {
+    @apply font-inter-regular text-[10px];
+  }
   body {
     @apply leading-relaxed font-poppins text-xs min-h-full text-dark;
   }
