@@ -1,19 +1,17 @@
 import Header from "@/layout/Header";
-import NavigationFullWidth from "@/layout/navigation/NavigationFullWidth";
-import Navigations from "@/layout/navigation/Navigations";
+import Navigation from "@/layout/navigation/Navigation";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
-const HeaderNav = ({ children }) => {
+const HeaderNav = ({ children, menu, submenu }) => {
   const { store, dispatch } = React.useContext(StoreContext);
 
   return (
     <>
-      <Navigations menu="dashboard" />
-      <NavigationFullWidth menu="dashboard" />
+      <Navigation menu={menu} submenu={submenu} />
       <Header />
       <div
-        className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out ${
-          store.isNavFullShow ? " pl-12 " : " pl-[220px] "
+        className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out py-5 bg-[#F6F7F9] dark:bg-[#0b111e] h-[93.5dvh] ${
+          !store.isNavFullShow ? " pl-12 " : " pl-[220px] "
         } sm:pr-6 pr-0`}
       >
         {children}

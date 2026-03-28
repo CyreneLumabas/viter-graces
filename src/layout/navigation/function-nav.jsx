@@ -35,6 +35,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "developer"],
     },
     {
       label: "Products",
@@ -44,6 +45,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
       label: "Inventory",
@@ -53,6 +55,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "developer"],
     },
     {
       label: "Customers",
@@ -62,15 +65,17 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
-      label: "Sales & Orders",
+      label: "Sales Orders",
       icon: <ShoppingCart className="size-5" />,
       menu: "sales-orders",
       path: `sales-orders`,
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
       label: "Returns",
@@ -80,6 +85,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
       label: "Finance",
@@ -89,6 +95,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "developer"],
     },
     {
       label: "Reports",
@@ -98,6 +105,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
       label: "Suppliers",
@@ -107,6 +115,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "product_owner", "cashier", "developer"],
     },
     {
       label: "Settings",
@@ -116,6 +125,7 @@ export const getNavList = () => {
       isOpenSubmenu: "",
       on_click: onClickNav,
       subList: [],
+      roles: ["admin", "developer"],
     },
     // {
     //   label: "Settings",

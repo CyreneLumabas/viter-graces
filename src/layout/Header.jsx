@@ -53,8 +53,8 @@ const Header = () => {
     <>
       <div
         className={` overflow-x-hidden ${
-          store.isNavFullShow ? "ml-10 pl-12 " : " pl-[260px] "
-        } transition-all ease-in duration-200  sm:pr-6 pr-0 bg-light py-2 shadow-xl border-b border-gray-300 dark:border-gray-600 dark:bg-gray-900 sticky top-0 z-50`}
+          !store.isNavFullShow ? "ml-10 pl-12 " : " pl-[260px] "
+        } transition-all ease-in duration-200  sm:pr-6 pr-0 bg-light py-2 shadow-xs border-b border-gray-300 dark:border-gray-600 dark:bg-gray-900 sticky top-0 z-50`}
       >
         <div className="flex justify-between items-center">
           <h2 className="text-black text-sm dark:text-light">Dashboard</h2>
