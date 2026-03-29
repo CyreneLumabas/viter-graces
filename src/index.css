@@ -1,18 +1,18 @@
 @import "tailwindcss";
 @font-face {
   font-family: "poppins";
-  src: url(/fonts/poppins-regular.woff) format("woff");
   font-style: normal;
   font-display: block;
+  src: url(/fonts/poppins-regular.woff) format("woff");
 }
 @font-face {
-  font-family: inter-regular;
+  font-family: "inter-regular";
   font-style: normal;
   font-display: block;
   src: url(/fonts/inter-regular.woff2) format("woff2");
 }
 @font-face {
-  font-family: inter-bold;
+  font-family: "inter-bold";
   font-style: normal;
   font-display: block;
   src: url(/fonts/inter-bold.woff2) format("woff2");
@@ -149,10 +149,13 @@
     @apply font-bold font-inter-bold dark:text-light;
   }
   p {
-    @apply mb-2;
+    @apply mb-2 font-inter-regular dark:text-light;
+  }
+  span {
+    @apply font-inter-regular dark:text-light;
   }
   small {
-    @apply font-inter-regular text-[10px];
+    @apply font-inter-regular text-[10px] dark:text-light;
   }
   body {
     @apply leading-relaxed font-poppins text-xs min-h-full text-dark;
@@ -161,7 +164,7 @@
     @apply font-poppins;
   }
   nav {
-    @apply bg-dark-bg;
+    @apply bg-dark-bg dark:bg-[#090e1a];
   }
   table {
     @apply border-collapse border-spacing-2 text-left w-full table-auto;

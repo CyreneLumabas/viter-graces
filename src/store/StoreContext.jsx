@@ -22,7 +22,7 @@ const initVal = {
   isSettingsOpen: false,
   isDonateNowOpen: false,
   isStripeError: null,
-  isNavFullShow: isMobileOrTablet ? true : false,
+  isNavFullShow: isMobileOrTablet ? false : true,
   scrollPosition: 0,
   credentials: {},
   // credentials: {
