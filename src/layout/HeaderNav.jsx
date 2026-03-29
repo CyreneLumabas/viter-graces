@@ -3,13 +3,13 @@ import NavigationFullWidth from "@/layout/navigation/NavigationFullWidth";
 import Navigations from "@/layout/navigation/Navigations";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
-const HeaderNav = ({ children }) => {
+const HeaderNav = ({ children, menu }) => {
   const { store, dispatch } = React.useContext(StoreContext);
 
   return (
     <>
-      <Navigations menu="dashboard" />
-      <NavigationFullWidth menu="dashboard" />
+      <Navigations menu={menu} />
+      <NavigationFullWidth menu={menu} />
       <Header />
       <div
         className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out ${

@@ -7,7 +7,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <HeaderNav>
+      <HeaderNav menu={"dashboard"}>
         <div className="my-2 sm:pr-0 pr-6 bg-pink-500">
           <div className="flex items-center justify-between ">
             <h4 className="text-base ">Dashboard</h4>
