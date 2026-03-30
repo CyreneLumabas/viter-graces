@@ -8,7 +8,7 @@ const HeaderNav = ({ children, menu, submenu }) => {
   return (
     <>
       <Navigation menu={menu} submenu={submenu} />
-      <Header />
+      <Header menu={menu} />
       <div
         className={`wrapper overflow-x-hidden transform transition-all duration-300 ease-in-out py-5 bg-[#F6F7F9] dark:bg-[#0b111e] h-[93.5dvh] ${
           !store.isNavFullShow ? " pl-12 " : " pl-[220px] "
