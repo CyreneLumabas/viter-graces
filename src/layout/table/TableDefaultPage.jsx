@@ -1,16 +1,19 @@
+import AddButton from "@/components/buttons/AddButton";
+import NoData from "@/components/NoData";
+import SearchBar from "@/components/SearchBar";
+import ServerError from "@/components/ServerError";
+import TableLoading from "@/components/spinners/TableLoading";
+import TableSpinner from "@/components/spinners/TableSpinner";
+import { apiVersion } from "@/config/config";
 import { StoreContext } from "@/store/StoreContext";
+import { isEmptyItem } from "@/utilities/isEmptyItem";
 import React from "react";
 import ModalAction from "../modal/ModalAction";
-import { apiVersion } from "@/config/config";
-import { isEmptyItem } from "@/utilities/isEmptyItem";
-import Loadmore from "@/components/Loadmore";
-import TableSpinner from "@/components/spinners/TableSpinner";
-import TableLoading from "@/components/spinners/TableLoading";
-import ServerError from "@/components/ServerError";
 
 const TableDefaultPage = ({
   children,
   theadList = [],
+  search,
   result,
   dataItem = null,
   classname = "",
@@ -30,7 +33,20 @@ const TableDefaultPage = ({
   };
   return (
     <>
-      <div className="hidden sm:block ">
+      <div className="flex justify-between mb-3">
+        <div className="w-full sm:max-w-80">
+          <SearchBar
+            search={search}
+            dispatch={dispatch}
+            // setOnSearch={result?.setOnSearch}
+            // onSearch={result?.onSearch}
+          />
+        </div>
+        <div>
+          <AddButton value={"User"} />
+        </div>
+      </div>
+      <div className="">
         {/* TABLE */}
         <div className="relative rounded-md text-center overflow-auto z-0 ">
           {result?.loading !== "pending" && result?.isFetching && (
@@ -43,9 +59,9 @@ const TableDefaultPage = ({
             onScroll={(e) => handleScroll(e)}
           >
             <table className="overflow-auto ">
-              <thead className={`${isTableScroll && "relative"} z-50`}>
-                <tr className="hidden sm:table-row sticky top-0 z-10 capitalize">
-                  <th className="min-w-[2rem] w-[2rem] text-center ">#</th>
+              <thead className={`${isTableScroll && "relative"} z-50 `}>
+                <tr className="hidden sm:table-row sticky top-0 z-10 capitalize ">
+                  <th className="min-w-4 w-12 ">#</th>
                   {theadList?.map((item, key) => (
                     <th className={`${item.class} `} key={key}>
                       {item.name}
@@ -54,7 +70,16 @@ const TableDefaultPage = ({
                 </tr>
               </thead>
               <tbody>
-                {(result?.loading === "pending" ||
+                {/*
+                <tr className="">
+                  <td colSpan="100%" className="p-10">
+                    {result?.loading === "pending" ? (
+                      <TableLoading count={20} cols={3} />
+                    ) : (
+                      <NoData />
+                    )}
+                  </td>
+                </tr>  {(result?.loading === "pending" ||
                   (result?.loading !== "error" &&
                     result?.pages[0]?.count === 0)) && (
                   <tr className="">
@@ -66,7 +91,7 @@ const TableDefaultPage = ({
                       )}
                     </td>
                   </tr>
-                )}
+                )} 
 
                 {result?.error && (
                   <tr>
@@ -74,13 +99,12 @@ const TableDefaultPage = ({
                       <ServerError />
                     </td>
                   </tr>
-                )}
+                )}*/}
 
                 {children}
               </tbody>
             </table>
-
-            {result?.loading === "success" && (
+            {/* {result?.loading === "success" && (
               <div className="loadmore flex justify-center flex-col items-center pb-10">
                 <Loadmore
                   fetchNextPage={result?.fetchNextPage}
@@ -93,7 +117,7 @@ const TableDefaultPage = ({
                   isSearchOrFilter={store.isSearch || result?.isFilter}
                 />
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

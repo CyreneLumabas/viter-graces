@@ -1,6 +1,6 @@
 import { setError, setMessage } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
-import { TimerReset } from "lucide-react";
+import { X } from "lucide-react";
 import React from "react";
 
 const MessageError = () => {
@@ -46,7 +46,7 @@ const MessageError = () => {
             className="rounded-sm p-2 hover:bg-gray-100/20"
             onClick={handleClose}
           >
-            <TimerReset />
+            <X />
           </button>
         </div>
       </div>
