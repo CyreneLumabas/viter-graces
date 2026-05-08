@@ -1,11 +1,8 @@
 import ModalButton from "@/components/buttons/ModalButton";
-import { InputSelectArray } from "@/components/inputs/InputSelect";
 import { InputText } from "@/components/inputs/InputText";
 import MessageError from "@/components/MessageError";
-import { apiVersion, devNavUrl } from "@/config/config";
+import { apiVersion } from "@/config/config";
 import ModalWrapper from "@/layout/modal/ModalWrapper";
-import { queryData } from "@/services/queryData";
-import useQueryData from "@/services/useQueryData";
 import {
   setError,
   setIsAdd,
@@ -20,29 +17,28 @@ import { Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
 
-const ModalUser = ({ itemEdit }) => {
+const ModalAddItem = ({ itemEdit, setAddItem }) => {
   const { store, dispatch } = React.useContext(StoreContext);
+  const queryClient = useQueryClient();
 
   const handleClose = () => {
-    dispatch(setIsAdd(false));
+    setAddItem(false);
   };
 
   handleEscape(() => handleClose());
-
-  const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (values) =>
       queryData(
         itemEdit
-          ? `${apiVersion}/users/${itemEdit?.id}`
-          : `${apiVersion}/users`,
+          ? `${apiVersion}/roles/${itemEdit?.id}`
+          : `${apiVersion}/roles`,
         itemEdit ? "put" : "post",
         values,
       ),
     onSuccess: (data) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
 
       if (data.success) {
         dispatch(setIsAdd(false));
@@ -57,22 +53,17 @@ const ModalUser = ({ itemEdit }) => {
   });
 
   const initVal = {
-    user_account_aid: isEmptyItem(itemEdit?.user_account_aid, ""),
-    user_account_first_name: isEmptyItem(itemEdit?.user_account_first_name, ""),
-    user_account_last_name: isEmptyItem(itemEdit?.user_account_last_name, ""),
-    user_account_email: isEmptyItem(itemEdit?.user_account_email, ""),
-    user_account_role_id: isEmptyItem(itemEdit?.user_account_role_id, ""),
-    user_account_role: isEmptyItem(itemEdit?.user_account_role, ""),
+    role_aid: isEmptyItem(itemEdit?.role_aid, ""),
+    role_name: isEmptyItem(itemEdit?.role_name, ""),
+    role_description: isEmptyItem(itemEdit?.role_description, ""),
 
-    name: isEmptyItem(itemEdit?.name, ""),
-    password_link: `/create-password`,
+    role_name_old: isEmptyItem(itemEdit?.role_name, ""),
+    role_description_old: isEmptyItem(itemEdit?.role_description, ""),
   };
 
   const yupSchema = Yup.object({
-    user_account_first_name: Yup.string().trim().required("Required"),
-    user_account_last_name: Yup.string().trim().required("Required"),
-    user_account_email: Yup.string().trim().required("Required"),
-    user_account_role_id: Yup.string().trim().required("Required"),
+    role_name: Yup.string().trim().required("Required"),
+    role_description: Yup.string().trim().required("Required"),
   });
 
   React.useEffect(() => {
@@ -82,10 +73,9 @@ const ModalUser = ({ itemEdit }) => {
   return (
     <>
       <ModalWrapper
-        val="User"
+        val="Item"
         itemEdit={itemEdit}
         mutation={mutation}
-        isOpen={true}
         handleClose={handleClose}
       >
         <div className="modal-body">
@@ -95,51 +85,36 @@ const ModalUser = ({ itemEdit }) => {
             onSubmit={async (values, { setSubmitting, resetForm }) => {
               dispatch(setError(false));
               // mutate data
-              // console.log(values);
               mutation.mutate(values);
             }}
           >
             {(props) => {
               return (
                 <Form>
-                  <div className="relative">
-                    <InputSelectArray
-                      label="Role"
-                      type="text"
-                      name="user_account_role_id"
-                      path="roles"
-                      onChange={(e) => {
-                        props.values.user_account_role_id = e.target.value;
-                        props.values.user_account_role =
-                          e.target.options[e.target.selectedIndex].text;
-                        return e;
-                      }}
-                    />
-                  </div>
-                  <div className="relative mt-3">
+                  <div className="relative mb-6">
                     <InputText
-                      label="First name"
+                      label="Item"
                       type="text"
-                      name="user_account_first_name"
-                      placeholder={`${itemEdit ? "Update user first name" : "Enter new user first name"}`}
+                      name="Item_name"
+                      placeholder={`${itemEdit ? "Update Product name" : "Enter new Product name"}`}
                       disabled={mutation.isPending}
                     />
                   </div>
-                  <div className="relative mt-3">
+                  <div className="relative mb-6">
                     <InputText
-                      label="Last name"
+                      label="Unit"
                       type="text"
-                      name="user_account_last_name"
-                      placeholder={`${itemEdit ? "Update user last name" : "Enter new user last name"}`}
+                      name="Item_name"
+                      placeholder={`${itemEdit ? "Update unit" : "Enter unit"}`}
                       disabled={mutation.isPending}
                     />
                   </div>
-                  <div className="relative mt-3">
+                  <div className="relative mb-6">
                     <InputText
-                      label="Email"
+                      label="Estimated Cost"
                       type="text"
-                      name="user_account_email"
-                      placeholder={`${itemEdit ? "Update user email" : "Enter new user email"}`}
+                      name="Item_name"
+                      placeholder={`${itemEdit ? "0.00" : "0.00"}`}
                       disabled={mutation.isPending}
                     />
                   </div>
@@ -170,4 +145,4 @@ const ModalUser = ({ itemEdit }) => {
   );
 };
 
-export default ModalUser;
+export default ModalAddItem;

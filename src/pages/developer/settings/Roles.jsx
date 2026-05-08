@@ -47,7 +47,7 @@ const Roles = () => {
       // },
       isMobileTitle: true,
     },
-    
+
     {
       accessorKey: "role_description",
       header: "Description",
@@ -57,7 +57,7 @@ const Roles = () => {
     },
     {
       accessorKey: "action",
-      action_array: DefaultActionTableList(),
+      action_array: DefaultActionTableList("roles"),
       header: "Action",
       classTh: " text-center ",
       classTd: "opacity-100 group-hover:opacity-100 -right-3 pr-5 z-10 ",

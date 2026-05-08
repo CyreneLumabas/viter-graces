@@ -1,8 +1,4 @@
-import {
-  ActiveInActiveStatus,
-  DefaultActionTableList,
-  UserActionTableList,
-} from "@/layout/ArrayValue";
+import { ActiveInActiveStatus, UserActionTableList } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
@@ -41,7 +37,7 @@ const UsersAccount = () => {
     },
     {
       accessorKey: "action",
-      action_array: UserActionTableList(),
+      action_array: UserActionTableList("users"),
       header: "Action",
       classTh: "text-center w-[7rem]",
       classTd: "opacity-100 group-hover:opacity-100 -right-3 pr-5 z-10 ",
