@@ -5,12 +5,12 @@ require '../../../core/header.php';
 // use needed functions
 require '../../../core/functions.php';
 // use needed classes
-require '../../../models/developer/customer/Customer.php';
+require '../../../models/developer/suppliers/Suppliers.php';
 // check database connection
 $conn = null;
 $conn = checkDbConnection();
 // make instance of classes
-$val = new Customer($conn);
+$val = new Suppliers($conn);
 // get payload
 $body = file_get_contents("php://input");
 $data = json_decode($body, true);

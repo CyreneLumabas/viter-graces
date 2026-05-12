@@ -30,6 +30,18 @@ export const StoreReducer = (state, action) => {
         isAdd: action.payload,
       };
 
+    case "IS_SUB_ADD":
+      return {
+        ...state,
+        isSubAdd: action.payload,
+      };
+
+    case "IS_VIEW":
+      return {
+        ...state,
+        isView: action.payload,
+      };
+
     case "IS_SEARCH":
       return {
         ...state,
@@ -70,6 +82,12 @@ export const StoreReducer = (state, action) => {
       return {
         ...state,
         isAction: action.payload,
+      };
+
+    case "SUB_ACTION":
+      return {
+        ...state,
+        isSubAction: action.payload,
       };
 
     case "IS_LOGIN":

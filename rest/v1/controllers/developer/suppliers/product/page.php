@@ -1,16 +1,16 @@
 <?php
 
 // set http header
-require '../../../core/header.php';
+require '../../../../core/header.php';
 // use needed functions
-require '../../../core/functions.php';
+require '../../../../core/functions.php';
 // use needed classes
-require '../../../models/developer/customer/Customer.php';
+require '../../../../models/developer/suppliers/SuppliersProduct.php';
 // check database connection
 $conn = null;
 $conn = checkDbConnection();
 // make instance of classes
-$val = new Customer($conn);
+$val = new SuppliersProduct($conn);
 // get payload
 $body = file_get_contents("php://input");
 $data = json_decode($body, true);
@@ -21,6 +21,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     checkPayload($data);
 
     if (array_key_exists("start", $_GET)) {
+        $val->suppliers_product_supplier_id = $data["id"];    // get data 
         $val->column_search = $data["searchValue"];    // get data 
         $val->column_start = $_GET['start'];
         $val->column_total = 15;
