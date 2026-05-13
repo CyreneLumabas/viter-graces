@@ -4,6 +4,7 @@ $conn = null;
 $conn = checkDbConnection();
 // make instance of classes
 $val = new Customer($conn);
+$valActivity = new ActivityLog($conn);
 // get $_GET data
 $error = [];
 $returnData = [];

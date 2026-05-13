@@ -5,11 +5,15 @@ require '../../../core/header.php';
 require '../../../core/functions.php';
 // use needed classes
 require '../../../models/developer/customer/Customer.php';
+// ACTIVITY LOG DETAILS
+require '../../../controllers/developer/activity-log/functions.php';
+require '../../../models/developer/activity-log/ActivityLog.php';
 // check database connection
 $conn = null;
 $conn = checkDbConnection();
 // make instance of classes
 $val = new Customer($conn);
+$valActivity = new ActivityLog($conn);
 $body = file_get_contents("php://input");
 $data = json_decode($body, true);
 // validate api key

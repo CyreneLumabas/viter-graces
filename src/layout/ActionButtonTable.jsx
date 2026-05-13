@@ -1,26 +1,16 @@
 import ActionButton from "@/components/buttons/ActionButton";
-import {
-  setIsAction,
-  setIsAdd,
-  setIsSubAction,
-  setIsSubAdd,
-} from "@/store/StoreAction";
+import { setIsAction, setIsAdd } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import { isEmptyItem } from "@/utilities/isEmptyItem";
 import React from "react";
 
-const ActionButtonTable = ({
-  item,
-  dataArray,
-  setData,
-  setItemEdit,
-  ishaveSubAdd = false,
-}) => {
+const ActionButtonTable = ({ item, dataArray, setData, setItemEdit, path }) => {
   const { store, dispatch } = React.useContext(StoreContext);
+
+  console.log("path", path);
 
   // ACTIONS ACHIEVE, RESTORE AND DELETE
   const handleAction = (val) => {
-    console.log("1523");
     dispatch(setIsAction(true));
     setData({
       ...dataArray,
@@ -28,28 +18,8 @@ const ActionButtonTable = ({
         val?.name !== "delete"
           ? `${val?.path}/${dataArray?.id}`
           : `${dataArray?.id}`,
+      menu: path,
       action: val?.name,
-    });
-  };
-
-  // ACTIONS SUB ACHIEVE, RESTORE AND DELETE
-  const handleSubAction = (val) => {
-    dispatch(setIsSubAction(true));
-    setData({
-      ...dataArray,
-      path:
-        val?.name !== "delete"
-          ? `${val?.path}/${dataArray?.id}`
-          : `${dataArray?.id}`,
-      action: val?.name,
-    });
-  };
-
-  // ACTIONS SUB UPDATE
-  const handleSubUpdate = (val) => {
-    dispatch(setIsSubAdd(true));
-    setItemEdit({
-      ...dataArray,
     });
   };
   // ACTIONS UPDATE
@@ -69,12 +39,7 @@ const ActionButtonTable = ({
             Number(isEmptyItem(a?.isActive, 1)) ===
               Number(isEmptyItem(dataArray?.is_active, 1)) && (
               <div key={key}>
-                <ActionButton
-                  item={a}
-                  onClick={() =>
-                    ishaveSubAdd ? handleSubUpdate(a) : handleUpdate(a)
-                  }
-                />
+                <ActionButton item={a} onClick={() => handleUpdate(a)} />
               </div>
             )
           );
@@ -85,12 +50,7 @@ const ActionButtonTable = ({
             Number(isEmptyItem(a?.isActive, 1)) ===
               Number(isEmptyItem(dataArray?.is_active, 1)) && (
               <div key={key}>
-                <ActionButton
-                  item={a}
-                  onClick={() =>
-                    ishaveSubAdd ? handleSubAction(a) : handleAction(a)
-                  }
-                />
+                <ActionButton item={a} onClick={() => handleAction(a)} />
               </div>
             )
           );
