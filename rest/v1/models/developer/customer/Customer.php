@@ -22,6 +22,7 @@ class Customer
     public $column_start;
     public $column_total;
     public $column_search;
+    public $max;
 
     public function __construct($db)
     {
@@ -83,7 +84,16 @@ class Customer
         $filterColumn = [];
 
         foreach ($this->filters as $item) {
-            $filterColumn[] = $item['id'] . " LIKE '%" . $item['value'] . "%' ";
+
+            if (is_array($item['value'])) {
+                if (is_array($item['value']) && $item["value"]["max"] === "") {
+                    $filterColumn[] = $item['id'] . " BETWEEN " . $item["value"]["min"] . " AND " . $this->max . " ";
+                } else {
+                    $filterColumn[] = $item['id'] . " BETWEEN " . $item["value"]["min"] . " AND " . $item["value"]["max"] . " ";
+                }
+            } else {
+                $filterColumn[] = $item['id'] . " LIKE '%" . $item['value'] . "%' ";
+            }
         }
         try {
             $sql = "select *, ";
@@ -94,15 +104,15 @@ class Customer
             $sql .= "customer_is_active as is_active, ";
             $sql .= "customer_name as name ";
             $sql .= "from {$this->tblCustomer} ";
+            $sql .= " where true ";
             if (!empty($filterColumn)) {
-                $sql .= " where " . implode(" and ", $filterColumn);
+                $sql .= " and " . implode(" and ", $filterColumn);
             } else {
-                $sql .= " where true ";
-            }
-            $sql .= ($this->column_search != "" ? "and ( customer_name like :customer_name 
+                $sql .= ($this->column_search != "" ? " and ( customer_name like :customer_name 
             or customer_email like :customer_email ) " : " ");
-            $sql .= "order by customer_is_active desc, ";
-            $sql .= "customer_name asc ";
+            }
+            $sql .= " order by customer_is_active desc, ";
+            $sql .= " customer_name asc ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 ...$this->column_search != "" ? [
@@ -123,7 +133,16 @@ class Customer
         $filterColumn = [];
 
         foreach ($this->filters as $item) {
-            $filterColumn[] = $item['id'] . " LIKE '%" . $item['value'] . "%' ";
+
+            if (is_array($item['value'])) {
+                if (is_array($item['value']) && $item["value"]["max"] === "") {
+                    $filterColumn[] = $item['id'] . " BETWEEN " . $item["value"]["min"] . " AND " . $this->max . " ";
+                } else {
+                    $filterColumn[] = $item['id'] . " BETWEEN " . $item["value"]["min"] . " AND " . $item["value"]["max"] . " ";
+                }
+            } else {
+                $filterColumn[] = $item['id'] . " LIKE '%" . $item['value'] . "%' ";
+            }
         }
         try {
             $sql = "select *, ";
@@ -134,15 +153,15 @@ class Customer
             $sql .= "customer_is_active as is_active, ";
             $sql .= "customer_name as name ";
             $sql .= "from {$this->tblCustomer} ";
+            $sql .= " where true ";
             if (!empty($filterColumn)) {
-                $sql .= " where " . implode(" and ", $filterColumn);
+                $sql .= " and " . implode(" and ", $filterColumn);
             } else {
-                $sql .= " where true ";
-            }
-            $sql .= ($this->column_search != "" ? "and ( customer_name like :customer_name 
+                $sql .= ($this->column_search != "" ? " and ( customer_name like :customer_name 
             or customer_email like :customer_email ) " : " ");
-            $sql .= "order by customer_is_active desc, ";
-            $sql .= "customer_name asc ";
+            }
+            $sql .= " order by customer_is_active desc, ";
+            $sql .= " customer_name asc ";
             $sql .= "limit :start, ";
             $sql .= ":total ";
             $query = $this->connection->prepare($sql);
