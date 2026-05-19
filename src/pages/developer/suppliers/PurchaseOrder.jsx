@@ -1,9 +1,11 @@
+import {
+  ActiveInActiveStatus,
+  DefaultActionTableList,
+} from "@/layout/ArrayValue";
+import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
-import { ArchiveRestore, Edit, RotateCcw, Trash } from "lucide-react";
 import React from "react";
-import ModalSuppliers from "./modal/ModalSuppliers";
-import HeaderNav from "@/layout/headers/HeaderNav";
 import ModalPurchaseOrder from "./modal/ModalPurchaseOrder";
 
 const PurchaseOrder = () => {
@@ -13,75 +15,66 @@ const PurchaseOrder = () => {
   // Columns
   const columns = [
     {
-      accessorKey: "user_account_is_active",
+      accessorKey: "purchase_order_is_active",
       header: "status",
       classTh: "w-[5rem]",
       classTd: "",
+      status_option: ActiveInActiveStatus(),
+      status_text: "purchase_order_status",
     },
     {
-      accessorKey: "name",
+      accessorKey: "purchase_order_number",
       header: "PO Number",
+      orderNumber: "1",
       classTh: "",
       classTd: "",
     },
     {
-      accessorKey: "contact person",
+      accessorKey: "purchase_order_supplier_name",
       header: "Supplier",
       classTh: "",
       classTd: "",
     },
     {
-      accessorKey: "email",
+      accessorKey: "formated_date",
       header: "Order date",
+      orderNumber: "2",
       classTh: "",
       classTd: "",
     },
     {
-      accessorKey: "phone",
+      accessorKey: "formated_delivery_date",
       header: "expected",
       classTh: "",
       classTd: "",
     },
     {
-      accessorKey: "address",
+      accessorKey: "total_amount",
       header: "total",
       classTh: "",
       classTd: "",
+      amount: true,
+      paid_amount: false,
     },
     {
-      accessorKey: "address",
+      accessorKey: "purchase_order_payment",
       header: "payment",
       classTh: "",
       classTd: "",
+      amount: false,
+      paid_amount: true,
+    },
+    {
+      accessorKey: "purchase_order_payment_status",
+      header: "payment status",
+      classTh: "w-[9rem]",
+      classTd: "",
+      status_option: ActiveInActiveStatus(),
+      status_text: "purchase_order_payment_status",
     },
     {
       accessorKey: "action",
-      action_array: [
-        {
-          name: "edit",
-          path: "purchase orders",
-          icon: <Edit className="h-3 w-3" />,
-          isActive: 1,
-        },
-        {
-          name: "archieve",
-          path: "active",
-          icon: <ArchiveRestore className="h-3 w-3" />,
-          isActive: 1,
-        },
-        {
-          name: "restore",
-          path: "active",
-          icon: <RotateCcw className="h-3 w-3" />,
-          isActive: 0,
-        },
-        {
-          name: "delete",
-          path: "purchase orders",
-          icon: <Trash className="h-3 w-3" />,
-          isActive: 0,
-        },
-      ],
+      action_array: DefaultActionTableList("purchase-order"),
       header: "Action",
       classTh: "text-center w-[7rem]",
       classTd: "opacity-100 group-hover:opacity-100 -right-3 pr-5 z-10 ",
@@ -94,11 +87,12 @@ const PurchaseOrder = () => {
         <InfiniteTable
           columns={columns}
           className={`sm:overflow-auto sm:h-[calc(93dvh-200px)] h-[calc(97dvh-250px)]`}
-          path="purchase orders"
+          path="purchase-order"
           setItemEdit={setItemEdit}
         />
       </HeaderNav>
       {store.isAdd && <ModalPurchaseOrder itemEdit={itemEdit} />}
+      {store.isView && <ModalPurchaseOrder itemEdit={itemEdit} />}
     </>
   );
 };
