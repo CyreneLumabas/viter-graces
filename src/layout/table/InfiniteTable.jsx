@@ -2,7 +2,7 @@ import AddButton from "@/components/buttons/AddButton";
 import ExportCSVButton from "@/components/buttons/ExportCSVButton";
 import { DebouncedInput } from "@/components/inputs/InputText";
 import NoData from "@/components/NoData";
-import { PesoSign } from "@/components/PesoSign";
+import { AmountWithPesoSign, PesoSign } from "@/components/PesoSign";
 import SearchBar from "@/components/SearchBar";
 import ServerError from "@/components/ServerError";
 import ButtonSpinner from "@/components/spinners/ButtonSpinner";
@@ -192,7 +192,8 @@ const InfiniteTable = ({
   };
 
   React.useEffect(() => {
-    if (result?.pages[0]?.total < 30) {
+    if (result?.pages[0]?.total > 30) {
+      // if (result?.pages[0]?.total < 30) {
       setIsFetchFilterDate(false);
     } else {
       setIsFetchFilterDate(true);
@@ -203,14 +204,14 @@ const InfiniteTable = ({
     <>
       <div className="sm:flex justify-between flex-row-reverse mb-3 gap-4 items-center">
         {ishaveAdd ? (
-          <div className="flex justify-end sm:mb-0! mb-3 ">
+          <div className="flex justify-end sm:mb-0! mb-3 w-full ">
             <AddButton value={path?.replaceAll("-", " ")} onClick={handleAdd} />
           </div>
         ) : (
           ""
         )}
         {ishaveSubAdd ? (
-          <div className="flex justify-end sm:mb-0! mb-3 ">
+          <div className="flex justify-end sm:mb-0! mb-3  ">
             <AddButton
               value={path?.replaceAll("-", " ")}
               onClick={handleSubAdd}
@@ -301,17 +302,6 @@ const InfiniteTable = ({
                           header?.column?.columnDef?.header,
                           header?.getContext(),
                         )}
-
-                        {/* <button
-                            onClick={header?.column?.getToggleSortingHandler()}
-                            className="bg-gray-100 hover:bg-white rounded-sm ml-2 "
-                          >
-                            {header?.column?.getIsSorted() !== "asc" ? (
-                              <ChevronDown />
-                            ) : (
-                              <ChevronUp />
-                            )}
-                          </button> */}
                       </th>
                     ))}
                   </tr>
@@ -414,11 +404,15 @@ const InfiniteTable = ({
                             ) : (
                               ""
                             )}
-                            {item?.column?.columnDef?.header === "status" ? (
-                              <TableStatus
-                                item={item?.column?.columnDef}
-                                dataArray={rowData}
-                              />
+                            {item?.column?.columnDef?.header === "status" ||
+                            item?.column?.columnDef?.header ===
+                              "payment status" ? (
+                              <>
+                                <TableStatus
+                                  item={item?.column?.columnDef}
+                                  dataArray={rowData}
+                                />
+                              </>
                             ) : item?.column?.columnDef?.isViewItems ? (
                               <button
                                 className="text-green-700 hover:text-green-800 hover:underline"
@@ -432,13 +426,25 @@ const InfiniteTable = ({
                                   item?.column?.columnDef?.amount,
                                   false,
                                 ) ? (
-                                  <PesoSign />
+                                  <AmountWithPesoSign
+                                    classN="size-3"
+                                    amount={rowData?.total_amount}
+                                  />
+                                ) : isEmptyItem(
+                                    item?.column?.columnDef?.paid_amount,
+                                    false,
+                                  ) ? (
+                                  <>
+                                    <AmountWithPesoSign
+                                      classN="size-3"
+                                      amount={rowData?.total_paid}
+                                    />
+                                  </>
                                 ) : (
-                                  ""
-                                )}
-                                {flexRender(
-                                  item?.column?.columnDef?.cell,
-                                  item?.getContext(),
+                                  flexRender(
+                                    item?.column?.columnDef?.cell,
+                                    item?.getContext(),
+                                  )
                                 )}
                               </div>
                             )}

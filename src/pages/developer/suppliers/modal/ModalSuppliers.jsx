@@ -1,5 +1,5 @@
 import ModalButton from "@/components/buttons/ModalButton";
-import { InputSelectWeeksArray } from "@/components/inputs/InputSelect";
+import { InputSelectArrayWithOptions } from "@/components/inputs/InputSelect";
 import { InputNumber, InputText } from "@/components/inputs/InputText";
 import MessageError from "@/components/MessageError";
 import { apiVersion } from "@/config/config";
@@ -24,6 +24,8 @@ import * as Yup from "yup";
 
 const ModalSuppliers = ({ itemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
+  const [counter, setCounter] = React.useState(0);
+  const [counterContact, setCounterContact] = React.useState(0);
   const [itemsContact, setItemsContact] = React.useState(
     itemEdit
       ? getConvertStringToJSONparseData(itemEdit?.suppliers_contact_person)
@@ -45,8 +47,10 @@ const ModalSuppliers = ({ itemEdit }) => {
       {
         contact_name: "",
         contact_phone: "",
+        id: counterContact,
       },
     ]);
+    setCounterContact((prev) => prev + 1);
   };
 
   const handleClose = () => {
@@ -99,8 +103,10 @@ const ModalSuppliers = ({ itemEdit }) => {
         product_name: "",
         price: "",
         unit: "",
+        id: counter,
       },
     ]);
+    setCounter((prev) => prev + 1);
   };
 
   const handleRemoveItem = (index) => {
@@ -130,6 +136,15 @@ const ModalSuppliers = ({ itemEdit }) => {
     dispatch(setError(false));
   }, []);
 
+  let optionWeek = [
+    { id: "0", name: "Monday" },
+    { id: "1", name: "Tuesday" },
+    { id: "2", name: "Wenesday" },
+    { id: "3", name: "Thursday" },
+    { id: "4", name: "Friday" },
+    { id: "5", name: "Saturday" },
+    { id: "6", name: "Sunday" },
+  ];
   return (
     <>
       <ModalWrapper
@@ -359,12 +374,12 @@ const ModalSuppliers = ({ itemEdit }) => {
                   )}
 
                   <div className="relative mt-3">
-                    <InputSelectWeeksArray
+                    <InputSelectArrayWithOptions
                       label="Delivery"
-                      path="Weeks"
                       type="text"
                       name="suppliers_delivery"
                       disabled={mutation.isPending}
+                      options={optionWeek}
                       onChange={(e) => {
                         props.values.suppliers_delivery = e.target.value;
                         return e;

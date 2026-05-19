@@ -189,7 +189,7 @@ const ModalProducts = ({ itemEdit }) => {
                       <InputSelectArray
                         label="Suppliers"
                         type="text"
-                        path="suppliers"
+                        path="suppliers/read-in-modal"
                         name="products_suppliers_id"
                         onChange={(e) => {
                           props.values.products_suppliers_id = e.target.value;
@@ -292,7 +292,7 @@ const ModalProducts = ({ itemEdit }) => {
                           />
                         </div>
                       )}
-                      <Upload className="opacity-0 duration-200 group-hover:opacity-100 fill-dark/70 absolute top-0 right-0 bottom-0 left-0 min-w-[2rem] min-h-[2rem] max-w-[2rem] max-h-[2rem] m-auto cursor-pointer" />
+                      <Upload className="opacity-0 duration-200 group-hover:opacity-100 fill-dark/70 absolute top-0 right-0 bottom-0 left-0 min-h-8 max-h-8 m-auto cursor-pointer" />
                       <InputPhotoUpload
                         name="photo"
                         type="file"
