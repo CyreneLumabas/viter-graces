@@ -8,8 +8,6 @@ import { isEmptyItem } from "@/utilities/isEmptyItem";
 import {
   FileText,
   Mail,
-  MessageCircle,
-  MessageSquare,
   MoreHorizontal,
   Phone,
   PhilippinePeso,
@@ -17,7 +15,19 @@ import {
   Wallet,
 } from "lucide-react";
 import React from "react";
+import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+
+// Builds a working m.me link whether the stored value is already a full
+// Messenger/Facebook URL or just a page username/id.
+const buildMessengerHref = (value) => {
+  if (!value) return undefined;
+  if (!/^https?:\/\//i.test(value)) return `https://m.me/${value}`;
+  if (/m\.me\//i.test(value)) return value;
+
+  const slug = value.replace(/\/+$/, "").split("/").pop();
+  return slug ? `https://m.me/${slug}` : value;
+};
 
 // One of the 4 top metric cards (Total Orders / Total Spent / Outstanding
 // Balance / Credit Memo) - icon + label stacked over the value.
@@ -28,8 +38,9 @@ const MetricCard = ({ icon, label, children, onClick }) => {
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
+      data-tooltip={onClick ? "View details" : undefined}
       className={`flex items-start gap-3 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-left bg-light dark:bg-gray-900 w-full ${
-        onClick ? "cursor-pointer hover:border-primary" : ""
+        onClick ? "cursor-pointer hover:border-primary tooltip-metric-card" : ""
       }`}
     >
       <span className="text-primary shrink-0 mt-0.5">{icon}</span>
@@ -85,6 +96,34 @@ const ViewCustomerDetails = ({ itemEdit }) => {
     dispatch(setIsView(false));
   };
 
+  // Filters the Sales Orders page by this customer - matches the same
+  // click-through the Customers table's "name"/"Outstanding Balance"
+  // columns already do.
+  const handleSalesOrdersClick = () => {
+    sessionStorage.setItem(
+      "filter",
+      JSON.stringify([
+        { id: "sales_order_customer_name", value: itemEdit?.customer_name },
+      ]),
+    );
+    dispatch(setIsView(false));
+    navigate(`${devNavUrl}/${userRole}/sales-orders`);
+  };
+
+  // Filters the Accounts Receivable page by this customer - matches the
+  // same click-through the Customers table's "Outstanding Balance" column
+  // already does.
+  const handleAccountsReceivableClick = () => {
+    sessionStorage.setItem(
+      "filter",
+      JSON.stringify([
+        { id: "sales_order_customer_name", value: itemEdit?.customer_name },
+      ]),
+    );
+    dispatch(setIsView(false));
+    navigate(`${devNavUrl}/${userRole}/accounts-receivable`);
+  };
+
   // Filters the Returns page by this customer AND resolution type "credit
   // memo" - matches the same click-through the Customers table's own
   // "Open Credit Memo" column already does.
@@ -96,7 +135,7 @@ const ViewCustomerDetails = ({ itemEdit }) => {
           id: "return_product_customer_name",
           value: itemEdit?.customer_name,
         },
-        { id: "return_product_resolution_type", value: "credit memo" },
+        { id: "resolution_type", value: "credit memo" },
       ]),
     );
     dispatch(setIsView(false));
@@ -127,17 +166,29 @@ const ViewCustomerDetails = ({ itemEdit }) => {
 
         {/* METRICS */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <MetricCard icon={<ShoppingBag size={18} />} label="Total Orders">
+          <MetricCard
+            icon={<ShoppingBag size={18} />}
+            label="Total Orders"
+            onClick={handleSalesOrdersClick}
+          >
             {isEmptyItem(itemEdit?.number_of_orders, 0)}
           </MetricCard>
-          <MetricCard icon={<PhilippinePeso size={18} />} label="Total Spent">
+          <MetricCard
+            icon={<PhilippinePeso size={18} />}
+            label="Total Spent"
+            onClick={handleSalesOrdersClick}
+          >
             <AmountWithPesoSign
               classAmnt="justify-start! "
               classN="size-3 "
               amount={`${isEmptyItem(itemEdit?.total_amount_spent, 0)}`}
             />
           </MetricCard>
-          <MetricCard icon={<Wallet size={18} />} label="Outstanding Balance">
+          <MetricCard
+            icon={<Wallet size={18} />}
+            label="Outstanding Balance"
+            onClick={handleAccountsReceivableClick}
+          >
             <AmountWithPesoSign
               classAmnt="justify-start! "
               classN="size-3"
@@ -176,14 +227,18 @@ const ViewCustomerDetails = ({ itemEdit }) => {
             value={itemEdit?.customer_phone}
           />
           <ContactRow
-            icon={<MessageCircle size={16} />}
+            icon={<FaFacebookMessenger size={16} />}
             value={itemEdit?.customer_messenger}
-            href={itemEdit?.customer_messenger}
+            href={buildMessengerHref(itemEdit?.customer_messenger)}
           />
           <ContactRow
-            icon={<MessageSquare size={16} />}
+            icon={<FaWhatsapp size={16} />}
             value={itemEdit?.customer_whatsapp}
-            href={itemEdit?.customer_whatsapp}
+            href={
+              itemEdit?.customer_whatsapp
+                ? `https://wa.me/${itemEdit.customer_whatsapp.replace(/\D/g, "")}`
+                : undefined
+            }
           />
           <ContactRow
             icon={<MoreHorizontal size={16} />}

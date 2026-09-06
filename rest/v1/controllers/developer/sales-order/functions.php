@@ -402,7 +402,11 @@ function installmentDetails($val, $installmentItems, $data)
 {
     $inst_payment_day = $data['sales_order_installment_type_day'];
 
-    $dateNow = date("Y-m-" . "$inst_payment_day");
+    if ($data['sales_order_installment_type'] == "monthly") {
+        $dateNow = date("Y-m-" . "$inst_payment_day");
+    } else {
+        $dateNow = date('Y-m-d', strtotime($val->sales_order_date)) . " $inst_payment_day";
+    }
 
     $val->installment_payment_received_id = "";
     $val->installment_payment_received_name = "";

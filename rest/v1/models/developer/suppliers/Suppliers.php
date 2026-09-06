@@ -215,7 +215,7 @@ class Suppliers
             $sql .= "suppliers_other as other, ";
             $sql .= "suppliers_name as name ";
             $sql .= "from {$this->tblSuppliers} ";
-            $sql .= " where true ";
+            $sql .= " where suppliers_is_default != 1 ";
             if (!empty($filterColumn)) {
                 $sql .= " and " . implode(" and ", $filterColumn);
             } else {
@@ -278,7 +278,7 @@ class Suppliers
             $sql .= "suppliers_other as other, ";
             $sql .= "suppliers_name as name ";
             $sql .= "from {$this->tblSuppliers} ";
-            $sql .= " where true ";
+            $sql .= " where suppliers_is_default != 1 ";
             if (!empty($filterColumn)) {
                 $sql .= " and " . implode(" and ", $filterColumn);
             } else {
