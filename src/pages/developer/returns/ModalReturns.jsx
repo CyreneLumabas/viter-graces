@@ -260,6 +260,9 @@ const ModalReturns = ({ itemEdit }) => {
                           props.values.other_reason = e.target.value;
                           if (e.target.value === "other") {
                             props.values.other_reason = "";
+                            setIsSelected(true);
+                          } else {
+                            setIsSelected(false);
                           }
                         }}
                         disabled={mutation.isPending}
