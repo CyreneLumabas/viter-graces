@@ -50,7 +50,27 @@ function allowedColumns()
     return $query;
 }
 
-// Delete 
+// Reject the request when a line item's product doesn't belong to the
+// purchase order's selected supplier (e.g. a stale payload sent after the
+// supplier was switched on the client without the items being reset first).
+function checkItemsBelongToSupplier($conn, $supplierId, $items)
+{
+    $productIds = array_map(
+        fn ($item) => $item["purchase_order_product_id"] ?? null,
+        $items
+    );
+
+    $val = new SuppliersProduct($conn);
+    $val->suppliers_product_supplier_id = $supplierId;
+
+    $mismatchCount = $val->countProductsNotBelongingToSupplier($productIds);
+
+    if ($mismatchCount > 0) {
+        returnError("One or more order items do not belong to the selected supplier.");
+    }
+}
+
+// Delete
 function checkDeleteById($object)
 {
     $query = $object->deleteById();

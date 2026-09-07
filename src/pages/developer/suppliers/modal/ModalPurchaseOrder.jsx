@@ -60,6 +60,14 @@ const ModalPurchaseOrder = ({ itemEdit }) => {
 
   const [counter, setCounter] = React.useState(1);
 
+  // ProductOwnerInputSelectTagArray (Products / Product Owner cells) keeps
+  // its own internal "selected" state that only reinitializes from
+  // `defaultValue` on mount - it has no way to know `items` was reset out
+  // from under it. Bumping this on a supplier-change reset and folding it
+  // into each row's `key` forces those cells to remount clean instead of
+  // showing a stale product/owner tag next to a blanked-out row.
+  const [itemsResetKey, setItemsResetKey] = React.useState(0);
+
   const initialItemsRef = React.useRef(null);
   if (initialItemsRef.current === null) {
     initialItemsRef.current = JSON.parse(JSON.stringify(items));
@@ -168,6 +176,61 @@ const ModalPurchaseOrder = ({ itemEdit }) => {
       },
     ]);
     setCounter((prev) => prev + 1);
+  };
+
+  // Order Items (and product owner) are only meaningful for the supplier
+  // they were picked under - the product picker itself is scoped to
+  // `purchase_order_supplier_id` (see ProductOwnerInputSelectTagArray's
+  // `suppliers-product/read-in-modal/{supplier_id}` path below), so
+  // switching supplier after items were already chosen leaves stale rows
+  // referencing the previous supplier's catalog. Reset back to one blank
+  // row and zero out the dependent totals whenever that happens.
+  const handleSupplierChange = (e, selectedItem, props) => {
+    const previousSupplierId = props.values.purchase_order_supplier_id;
+    const nextSupplierId = e?.id ?? "";
+
+    props.setFieldValue("purchase_order_supplier_id", nextSupplierId);
+    props.setFieldValue("purchase_order_supplier_name", e?.value ?? "");
+    props.setFieldValue("suppliers_delivery", selectedItem?.suppliers_delivery);
+
+    const hasItemData = items.some(
+      (item) =>
+        Number(item?.purchase_order_product_id) > 0 ||
+        Number(item?.purchase_order_price) > 0,
+    );
+
+    if (
+      hasItemData &&
+      previousSupplierId !== "" &&
+      String(previousSupplierId) !== String(nextSupplierId)
+    ) {
+      setItems([
+        {
+          purchase_order_aid: "0",
+          purchase_order_product_id: "",
+          purchase_order_product_name: "",
+          purchase_order_product_owner_id: "",
+          purchase_order_product_owner_name: "",
+          purchase_order_qty: "1",
+          purchase_order_price: "",
+          suppliers_delivery: selectedItem?.suppliers_delivery ?? "monday",
+          purchase_order_delivery_is_status: true,
+          purchase_order_total_amount: 0,
+          id: 0,
+        },
+      ]);
+      setItemsDelete([]);
+      setCounter(1);
+      setItemsResetKey((prev) => prev + 1);
+
+      // total_amount / total_sub_amount / purchase_order_tax fall out of
+      // PropsValues() recomputing from the (now empty) items on next render;
+      // the discount is a standalone field so it needs an explicit reset.
+      props.setFieldValue("purchase_order_discount", "0");
+      props.setFieldValue("purchase_order_discount_percentage", "");
+    }
+
+    return e;
   };
 
   const handleRemoveItem = (a) => {
@@ -454,22 +517,9 @@ const ModalPurchaseOrder = ({ itemEdit }) => {
                       <div className="relative z-50">
                         <InputSelectFilterTagArray
                           label="Supplier"
-                          onChange={(e, selectedItem) => {
-                            props.setFieldValue(
-                              "purchase_order_supplier_id",
-                              e?.id ?? "",
-                            );
-                            props.setFieldValue(
-                              "purchase_order_supplier_name",
-                              e?.value ?? "",
-                            );
-                            props.setFieldValue(
-                              "suppliers_delivery",
-                              selectedItem?.suppliers_delivery,
-                            );
-
-                            return e;
-                          }}
+                          onChange={(e, selectedItem) =>
+                            handleSupplierChange(e, selectedItem, props)
+                          }
                           itemEdit={itemEdit}
                           path={`suppliers/read-in-modal`}
                           testFilterId="purchase_order_supplier_id"
@@ -540,7 +590,10 @@ const ModalPurchaseOrder = ({ itemEdit }) => {
                           <tbody className=" ">
                             {items.map((a, index) => {
                               return (
-                                <tr key={index} className="border-0!">
+                                <tr
+                                  key={`${index}-${itemsResetKey}`}
+                                  className="border-0!"
+                                >
                                   <td className="text-center dark:bg-gray-900! bg-gray-100! last:opacity-100 last:group-hover:opacity-100 last:-right-3 last:z-10">
                                     {index + 1}.
                                   </td>

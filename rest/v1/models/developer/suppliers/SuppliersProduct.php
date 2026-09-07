@@ -328,6 +328,37 @@ class SuppliersProduct
         return $query;
     }
 
+    // Count how many of the given suppliers_product ids do NOT belong to
+    // $this->suppliers_product_supplier_id (missing or mismatched) - used to
+    // reject a purchase order whose line items don't match its supplier.
+    public function countProductsNotBelongingToSupplier($productIds)
+    {
+        $productIds = array_values(array_unique(array_filter(
+            $productIds,
+            fn ($id) => (int)$id > 0
+        )));
+
+        if (empty($productIds)) {
+            return 0;
+        }
+
+        try {
+            $placeholders = implode(",", array_fill(0, count($productIds), "?"));
+            $sql = "select count(*) as total from {$this->tblSuppliersProduct} ";
+            $sql .= "where suppliers_product_aid in ($placeholders) ";
+            $sql .= "and suppliers_product_supplier_id = ? ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([...$productIds, $this->suppliers_product_supplier_id]);
+            $row = $query->fetch(PDO::FETCH_ASSOC);
+            $matchedCount = (int) ($row['total'] ?? 0);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            return count($productIds);
+        }
+
+        return count($productIds) - $matchedCount;
+    }
+
     // name
     public function checkName()
     {

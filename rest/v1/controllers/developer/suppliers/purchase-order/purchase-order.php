@@ -6,6 +6,7 @@ require '../../../../core/functions.php';
 require 'functions.php';
 // use needed classes
 require '../../../../models/developer/suppliers/SuppliersPurchaseOrder.php';
+require '../../../../models/developer/suppliers/SuppliersProduct.php';
 // ACTIVITY LOG DETAILS
 require '../../../../controllers/developer/activity-log/functions.php';
 require '../../../../models/developer/activity-log/ActivityLog.php';

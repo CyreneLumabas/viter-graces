@@ -16,6 +16,7 @@ if (isset($_GET['id'])) {
     checkEndpoint();
 }
 checkPayload($data);
+checkItemsBelongToSupplier($conn, $data["purchase_order_supplier_id"] ?? "", $data["purchase_order"] ?? []);
 
 // Cast and parse static payload values once
 $totalAmount = (float)($data['order_total_amount'] ?? 0);

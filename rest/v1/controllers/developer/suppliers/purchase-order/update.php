@@ -18,6 +18,7 @@ if (!isset($_GET['id'])) {
 
 // Validate payload
 checkPayload($data);
+checkItemsBelongToSupplier($conn, $data["purchase_order_supplier_id"] ?? "", $data["purchase_order"] ?? []);
 
 // Pre-calculate and cast static values once (Outside the loop)
 $totalAmount = (float)($data['order_total_amount'] ?? 0);
