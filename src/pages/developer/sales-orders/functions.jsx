@@ -74,10 +74,6 @@ export const PropsValues = (props, items) => {
       Number(values.sales_order_online_transaction);
   }
 
-  if (values.sales_order_payment_method === "credit memo") {
-    values.sales_order_paid_amount = Number(values.sales_order_credit_memo);
-  }
-
   if (
     values.sales_order_discount_type === "percentage" &&
     Number(values.sales_order_discount_percentage) !== 0 &&
@@ -89,10 +85,24 @@ export const PropsValues = (props, items) => {
       Number(values.subtotal) * Number(percentageDiscount);
   }
 
+  console.log(
+    "123",
+    Number(values.sales_order_cash),
+    Number(values.sales_order_check),
+    Number(values.sales_order_credit_memo),
+    Number(values.sales_order_online_transaction),
+    Number(values.sales_order_total_balance_amount),
+    Number(values.sales_order_installment_count),
+  );
   return;
 };
 // Copyright year
-export const Validations = (values, items, dispatch, creditMemoBalance = Infinity) => {
+export const Validations = (
+  values,
+  items,
+  dispatch,
+  creditMemoBalance = Infinity,
+) => {
   const invalidItem = items.find(
     (item) =>
       isEmptyItem(item?.is_new, false) &&
@@ -113,7 +123,7 @@ export const Validations = (values, items, dispatch, creditMemoBalance = Infinit
     return true;
   }
 
-  if (values.sales_order_payment_method === "credit memo") {
+  if (values.sales_order_payment_method === "mutiple payment") {
     const maxCreditMemo = Math.min(
       creditMemoBalance,
       Number(values.sales_order_total_receivable_amount),

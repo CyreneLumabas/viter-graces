@@ -327,7 +327,7 @@ export const PaymentMethodList = () => {
     { label: "check", value: "check" },
     { label: "online transaction", value: "online transaction" },
     { label: "mutiple payment", value: "mutiple payment" },
-    { label: "credit memo", value: "credit memo" },
+    // { label: "credit memo", value: "credit memo" },
   ];
 
   return result;
@@ -380,6 +380,8 @@ export const InstallmentByType = (val = "monthly") => {
       { label: "wednesday", value: "wednesday" },
       { label: "thursday", value: "thursday" },
       { label: "friday", value: "friday" },
+      { label: "saturday", value: "saturday" },
+      { label: "sunday", value: "sunday" },
     ];
 
     return result;

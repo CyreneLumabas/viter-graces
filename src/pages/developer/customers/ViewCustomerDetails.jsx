@@ -48,11 +48,11 @@ const MetricCard = ({
   return (
     <Tag
       type={onClick ? "button" : undefined}
-      onClick={Number(ProductOwnerId(store)) > 0 ? onClick : ""}
+      onClick={label !== "Outstanding Balance" ? onClick : ""}
       // onClick={onClick}
       // data-tooltip={onClick ? "View details" : undefined}
       data-tooltip={
-        Number(ProductOwnerId(store)) > 0
+        label !== "Outstanding Balance"
           ? onClick
             ? "View details"
             : undefined

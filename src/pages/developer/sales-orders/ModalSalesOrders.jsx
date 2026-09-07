@@ -89,15 +89,15 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
     { id: selectedCustomerId },
   );
 
-  const creditMemoBalance = Number(
-    isEmptyItem(creditMemoResult?.data?.[0]?.open_credit_memo, 0),
-  );
+  const creditMemoBalance = itemEdit
+    ? itemEdit?.sales_order_credit_memo
+    : Number(isEmptyItem(creditMemoResult?.data?.[0]?.open_credit_memo, 0));
 
   const paymentMethodOptions = PaymentMethodList().filter(
     (option) =>
-      option.value !== "credit memo" ||
+      option.value !== "mutiple payment" ||
       (Number(selectedCustomerId) > 0 && creditMemoBalance > 0) ||
-      itemEdit?.sales_order_payment_method === "credit memo",
+      itemEdit?.sales_order_payment_method === "mutiple payment",
   );
   console.log("creditMemoBalance", creditMemoBalance);
   // matches the blank row handleAddItem appends - a plain "Add Item" click
@@ -371,7 +371,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
       "max-credit-memo",
       "Exceeds the available credit memo balance",
       function (value) {
-        if (this.parent.sales_order_payment_method !== "credit memo") {
+        if (this.parent.sales_order_payment_method !== "mutiple payment") {
           return true;
         }
         // const maxAllowed = Math.min(
@@ -496,7 +496,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                         type="text"
                         name="sales_order_payment_method"
                         defaultValue="cash"
-                        options={paymentMethodOptions}
+                        options={PaymentMethodList()}
                         onChange={(e) => {
                           const previousMethod =
                             props.values.sales_order_payment_method;
@@ -511,16 +511,24 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                             props.values.sales_order_total_receivable_amount,
                           );
 
-                          if (selectedMethod === "credit memo") {
+                          if (selectedMethod === "mutiple payment") {
                             props.setFieldValue(
                               "sales_order_credit_memo",
                               orderTotal > 0
                                 ? Math.min(creditMemoBalance, orderTotal)
                                 : creditMemoBalance,
                             );
-                          } else if (previousMethod === "credit memo") {
+                          } else if (previousMethod === "mutiple payment") {
                             props.setFieldValue("sales_order_credit_memo", 0);
+                          } else {
                             props.setFieldValue("sales_order_paid_amount", 0);
+                            props.setFieldValue("sales_order_cash", 0);
+                            props.setFieldValue("sales_order_check", 0);
+                            props.setFieldValue(
+                              "sales_order_online_transaction",
+                              0,
+                            );
+                            props.setFieldValue("sales_order_credit_memo", 0);
                           }
 
                           return e;
@@ -761,9 +769,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                       </div>
 
                       {props.values.sales_order_payment_method !==
-                        "mutiple payment" &&
-                      props.values.sales_order_payment_method !==
-                        "credit memo" ? (
+                      "mutiple payment" ? (
                         <div className="relative ">
                           <InputNumber
                             label="Amount Paid"
@@ -787,9 +793,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                       )}
                     </div>
                     {props.values.sales_order_payment_method ===
-                      "mutiple payment" ||
-                    props.values.sales_order_payment_method ===
-                      "credit memo" ? (
+                    "mutiple payment" ? (
                       <>
                         <div
                           className={`${creditMemoBalance > 0 ? "grid-cols-4 " : "grid-cols-3 "} grid gap-3 pb-2 overflow-auto `}
@@ -910,25 +914,25 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                       <div className="flex justify-between gap-3 pb-2 overflow-auto">
                         <div className="  ">
                           <p className="">Type of installment</p>
-                          <div className="flex">
+                          <div className="flex capitalize">
                             {props.values.sales_order_installment_type}
                           </div>
                         </div>
                         <div className="  ">
                           <p className="">Payment every</p>
-                          <div className="flex">
+                          <div className="flex capitalize">
                             {props.values.sales_order_installment_type_day}
                           </div>
                         </div>
                         <div className="  ">
                           <p className="">Installment count</p>
-                          <div className="flex">
+                          <div className="flex capitalize">
                             {props.values.sales_order_installment_count}
                           </div>
                         </div>
                         <div className="  ">
                           <p className="">Installment Amount</p>
-                          <div className="flex">
+                          <div className="flex capitalize">
                             <PhilippinePeso className={`size-3 mr-1 mt-1`} />
                             {props.values.sales_order_installment_amount}
                           </div>
