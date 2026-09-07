@@ -40,11 +40,18 @@ if (array_key_exists("id", $_GET)) {
     $val->return_product_owner_id = $data["return_product_owner_id"];
     $val->return_product_owner_name = $data["return_product_owner_name"];
     $val->return_product_number = $data["return_product_number"];
+    $val->return_product_resolution_type = $data["return_product_resolution_type"];
+    $val->return_product_refund_method = $data["return_product_refund_method"] ?? null;
 
-    if ($val->return_product_status === "processed" && (float)$val->return_product_is_restocked == 0 && (float)$val->return_product_resolution_type != "credit memo") {
+    if ($val->return_product_status === "processed" && (float)$val->return_product_is_restocked == 0 && $val->return_product_resolution_type === "refund") {
         $val->return_product_paid_amount = $data["return_product_amount"];
     }
-    if ($val->return_product_status !== "processed" && (float)$val->return_product_is_restocked == 0 && (float)$val->return_product_resolution_type != "credit memo") {
+
+    if ($val->return_product_status !== "processed" && (float)$val->return_product_is_restocked == 0 && $val->return_product_resolution_type !== "credit memo") {
+        $val->return_product_paid_amount = 0;
+    }
+
+    if ($val->return_product_resolution_type === "replacement") {
         $val->return_product_paid_amount = 0;
     }
     // check name

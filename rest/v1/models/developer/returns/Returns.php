@@ -350,12 +350,16 @@ class Returns
         try {
             $sql = "update {$this->tblReturnProducts} set ";
             $sql .= "return_product_status = :return_product_status, ";
+            $sql .= "return_product_resolution_type = :return_product_resolution_type, ";
+            $sql .= "return_product_refund_method = :return_product_refund_method, ";
             $sql .= "return_product_paid_amount = :return_product_paid_amount, ";
             $sql .= "return_product_updated = :return_product_updated ";
             $sql .= "where return_product_aid = :return_product_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "return_product_status" => $this->return_product_status,
+                "return_product_resolution_type" => $this->return_product_resolution_type,
+                "return_product_refund_method" => $this->return_product_refund_method,
                 "return_product_paid_amount" => $this->return_product_paid_amount,
                 "return_product_updated" => $this->return_product_updated,
                 "return_product_aid" => $this->return_product_aid,

@@ -209,6 +209,12 @@ const ModalReturns = ({ itemEdit }) => {
                               "other",
                             );
                           }
+                          if (e.target.value !== "refund") {
+                            props.setFieldValue(
+                              "return_product_refund_method",
+                              "",
+                            );
+                          }
                         }}
                       >
                         <optgroup label={`Select Resolution Types`}>
@@ -222,25 +228,28 @@ const ModalReturns = ({ itemEdit }) => {
                       </InputSelect>
                     </div>
 
-                    <div className="relative">
-                      <InputSelect
-                        label="Refund Method"
-                        type="text"
-                        name="return_product_refund_method"
-                        disabled={mutation.isPending}
-                      >
-                        <optgroup label={`Select Refund Method`}>
-                          <option value="" hidden>
-                            --
-                          </option>
-                          {RefundMethodList().map((item, key) => (
-                            <option key={key} value={item.value}>
-                              {item.label}
+                    {props.values.return_product_resolution_type ===
+                      "refund" && (
+                      <div className="relative">
+                        <InputSelect
+                          label="Refund Method"
+                          type="text"
+                          name="return_product_refund_method"
+                          disabled={mutation.isPending}
+                        >
+                          <optgroup label={`Select Refund Method`}>
+                            <option value="" hidden>
+                              --
                             </option>
-                          ))}
-                        </optgroup>
-                      </InputSelect>
-                    </div>
+                            {RefundMethodList().map((item, key) => (
+                              <option key={key} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        </InputSelect>
+                      </div>
+                    )}
 
                     <div className="relative">
                       <InputSelect
