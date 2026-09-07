@@ -80,8 +80,8 @@ const Customers = () => {
       header: "Outstanding Balance",
       link:
         Number(ProductOwnerId(store)) > 0
-          ? ""
-          : `${devNavUrl}/${userRole}/accounts-receivable`,
+          ? `${devNavUrl}/${userRole}/accounts-receivable`
+          : "",
       filterOnClickId: "sales_order_customer_name",
       amount: true,
       classTh: "min-w-45 ",
@@ -92,10 +92,7 @@ const Customers = () => {
     {
       accessorKey: "open_credit_memo",
       header: "Open Credit Memo",
-      link:
-        Number(ProductOwnerId(store)) > 0
-          ? ""
-          : `${devNavUrl}/${userRole}/returns`,
+      link: `${devNavUrl}/${userRole}/returns`,
       filterOnClickId: "return_product_customer_name",
       filterResolutionType: "resolution_type",
       amount: true,

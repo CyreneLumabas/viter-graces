@@ -5,6 +5,7 @@ import ModalWrapper from "@/layout/modal/ModalWrapper";
 import { setIsView } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import { isEmptyItem } from "@/utilities/isEmptyItem";
+import { ProductOwnerId } from "@/utilities/productOwnerToken";
 import {
   FileText,
   Mail,
@@ -33,12 +34,19 @@ const buildMessengerHref = (value) => {
 // Balance / Credit Memo) - icon + label stacked over the value.
 const MetricCard = ({ icon, label, children, onClick }) => {
   const Tag = onClick ? "button" : "div";
+  const { store } = React.useContext(StoreContext);
 
   return (
     <Tag
       type={onClick ? "button" : undefined}
-      onClick={onClick}
-      data-tooltip={onClick ? "View details" : undefined}
+      onClick={Number(ProductOwnerId(store)) > 0 ? onClick : ""}
+      data-tooltip={
+        Number(ProductOwnerId(store)) > 0
+          ? onClick
+            ? "View details"
+            : undefined
+          : "Redirect is not avialable for now"
+      }
       className={`flex items-start gap-3 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-left bg-light dark:bg-gray-900 w-full ${
         onClick ? "cursor-pointer hover:border-primary tooltip-metric-card" : ""
       }`}
@@ -73,14 +81,10 @@ const ContactRow = ({ icon, value, href }) => {
             {value}
           </a>
         ) : (
-          <span className="text-black dark:text-light break-all">
-            {value}
-          </span>
+          <span className="text-black dark:text-light break-all">{value}</span>
         )
       ) : (
-        <span className="text-gray-400 dark:text-gray-500">
-          Not provided
-        </span>
+        <span className="text-gray-400 dark:text-gray-500">Not provided</span>
       )}
     </li>
   );
