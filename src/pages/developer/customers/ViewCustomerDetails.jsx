@@ -15,12 +15,8 @@ import {
   Wallet,
 } from "lucide-react";
 import React from "react";
-<<<<<<< HEAD
-import { Link, useNavigate } from "react-router-dom";
-=======
 import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
->>>>>>> 2467bf99b32e50371ecafcdd023cfa338849e6f4
 
 // Builds a working m.me link whether the stored value is already a full
 // Messenger/Facebook URL or just a page username/id.
@@ -50,31 +46,6 @@ const MetricCard = ({
   const Tag = onClick ? "button" : "div";
 
   return (
-<<<<<<< HEAD
-    <Link
-      to={`${devNavUrl}/${userRole}/${path}`}
-      className={`flex items-start gap-3 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-left bg-light dark:bg-gray-900 w-full`}
-      data-tooltip={`Go to ${tooltip}`}
-      onClick={() =>
-        sessionStorage.setItem(
-          "filter",
-          JSON.stringify([
-            {
-              id: filterOnClickId,
-              value: rowData?.customer_name,
-            },
-            ...(resolution_type
-              ? [
-                  {
-                    id: "return_product_resolution_type",
-                    value: "credit memo",
-                  },
-                ]
-              : []),
-          ]),
-        )
-      }
-=======
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
@@ -82,7 +53,6 @@ const MetricCard = ({
       className={`flex items-start gap-3 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-left bg-light dark:bg-gray-900 w-full ${
         onClick ? "cursor-pointer hover:border-primary tooltip-metric-card" : ""
       }`}
->>>>>>> 2467bf99b32e50371ecafcdd023cfa338849e6f4
     >
       <span className="text-primary shrink-0 mt-0.5">{icon}</span>
       <span className="flex flex-col min-w-0">
@@ -91,7 +61,7 @@ const MetricCard = ({
           {children}
         </span>
       </span>
-    </Link>
+    </Tag>
   );
 };
 
@@ -133,8 +103,6 @@ const ViewCustomerDetails = ({ itemEdit }) => {
     dispatch(setIsView(false));
   };
 
-<<<<<<< HEAD
-=======
   // Filters the Sales Orders page by this customer - matches the same
   // click-through the Customers table's "name"/"Outstanding Balance"
   // columns already do.
@@ -181,7 +149,6 @@ const ViewCustomerDetails = ({ itemEdit }) => {
     navigate(`${devNavUrl}/${userRole}/returns`);
   };
 
->>>>>>> 2467bf99b32e50371ecafcdd023cfa338849e6f4
   return (
     <ModalWrapper
       itemEdit={itemEdit}
