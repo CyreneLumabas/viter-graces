@@ -392,6 +392,38 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
     dispatch(setError(false));
   }, []);
 
+  // Keeps the Credit memo field synced to the newly-selected customer's
+  // available balance when Payment Method is already "mutiple payment" -
+  // the Payment Method dropdown's own onChange only covers the case where
+  // the user switches *into* that method, not a customer swap while already
+  // in it. formikRef is populated from the render-prop below since Formik's
+  // bag (setFieldValue/values) only exists inside that scope.
+  const formikRef = React.useRef(null);
+  const didMountRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    const formik = formikRef.current;
+    if (
+      !formik ||
+      formik.values.sales_order_payment_method !== "mutiple payment"
+    ) {
+      return;
+    }
+    const orderTotal = Number(
+      formik.values.sales_order_total_receivable_amount,
+    );
+    const nextAmount =
+      creditMemoBalance > 0
+        ? orderTotal > 0
+          ? Math.min(creditMemoBalance, orderTotal)
+          : creditMemoBalance
+        : 0;
+    formik.setFieldValue("sales_order_credit_memo", nextAmount);
+  }, [selectedCustomerId, creditMemoBalance]);
+
   return (
     <>
       {/*  */}
@@ -439,6 +471,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
           >
             {(props) => {
               PropsValues(props, items);
+              formikRef.current = props;
 
               if (
                 Number(props.values.sales_order_customer_id) ===
@@ -571,7 +604,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                     )}
                   </div>
                   {creditMemoBalance > 0 ? (
-                    <div className="mt-2 p-1 bg-gray-50 ">
+                    <div className="mt-2 p-1 bg-gray-50 dark:bg-gray-50/5 ">
                       <p className="mb-0! flex ">
                         NOTE: Credit memo available amount:
                         <AmountsWithPesoSign
