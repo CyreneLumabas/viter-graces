@@ -686,7 +686,13 @@ class Customer
             $sql .= "        MAX(sales_order_credit_memo) as applied_credit_memo ";
             $sql .= "    from {$this->tblSalesOrder} ";
             $sql .= "    where sales_order_customer_id = :sales_order_customer_id ";
-            $sql .= "    and sales_order_payment_method = 'credit memo' ";
+            // sales_order_credit_memo > 0 (not payment_method = 'credit
+            // memo') so an order that paid PART cash/check/online and part
+            // credit memo under "multiple payment" still counts its share -
+            // otherwise that share never gets subtracted back out and the
+            // customer's available balance is overstated, risking a
+            // double-spend of credit that's already gone.
+            $sql .= "    and sales_order_credit_memo > 0 ";
             $sql .= "    and sales_order_number != :sales_order_number ";
             $sql .= "    group by sales_order_number ";
             $sql .= ") as unique_orders";

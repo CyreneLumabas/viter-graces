@@ -380,6 +380,13 @@ function applyCreditMemoToReturns($returnsObject, $customerId, $deltaAmount)
 
         $returnsObject->return_product_aid = $row['return_product_aid'];
         $returnsObject->return_product_status = $row['return_product_status'];
+        // Returns::update() writes these columns on every call - carry the
+        // row's own values through so this consumption-only update doesn't
+        // blank them out (that's what silently dropped credit memo returns
+        // out of readCreditMemoReturnsByCustomerId()'s "= 'credit memo'"
+        // filter after their first sales-order application).
+        $returnsObject->return_product_resolution_type = $row['return_product_resolution_type'];
+        $returnsObject->return_product_refund_method = $row['return_product_refund_method'];
         $returnsObject->return_product_paid_amount = $newPaid;
         $returnsObject->return_product_updated = date("Y-m-d H:i:s");
         checkUpdate($returnsObject);

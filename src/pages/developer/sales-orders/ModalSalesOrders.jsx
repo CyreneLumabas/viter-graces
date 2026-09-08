@@ -89,9 +89,14 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
     { id: selectedCustomerId },
   );
 
-  const creditMemoBalance = itemEdit
-    ? itemEdit?.sales_order_credit_memo
-    : Number(isEmptyItem(creditMemoResult?.data?.[0]?.open_credit_memo, 0));
+  // Always the freshly-fetched remaining balance, never itemEdit's own
+  // previously-saved sales_order_credit_memo ("total spent", not
+  // "available") - the endpoint already excludes this order's own past
+  // consumption via excludeSalesOrderNumber above, so it's safe to use here
+  // for both create and edit.
+  const creditMemoBalance = Number(
+    isEmptyItem(creditMemoResult?.data?.[0]?.open_credit_memo, 0),
+  );
 
   const paymentMethodOptions = PaymentMethodList().filter(
     (option) =>

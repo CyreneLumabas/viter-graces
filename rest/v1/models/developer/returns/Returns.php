@@ -327,7 +327,8 @@ class Returns
     {
         try {
             $sql = "select return_product_aid, return_product_amount, ";
-            $sql .= "return_product_paid_amount, return_product_status ";
+            $sql .= "return_product_paid_amount, return_product_status, ";
+            $sql .= "return_product_resolution_type, return_product_refund_method ";
             $sql .= "from {$this->tblReturnProducts} ";
             $sql .= "where return_product_customer_id = :return_product_customer_id ";
             $sql .= "and return_product_resolution_type = 'credit memo' ";

@@ -82,6 +82,10 @@ function applyCreditMemoForCollection($returnsObject, $customerId, $amount)
 
         $returnsObject->return_product_aid = $row['return_product_aid'];
         $returnsObject->return_product_status = $row['return_product_status'];
+        // Returns::update() writes these columns on every call - carry them
+        // through so this consumption-only update doesn't blank them out.
+        $returnsObject->return_product_resolution_type = $row['return_product_resolution_type'];
+        $returnsObject->return_product_refund_method = $row['return_product_refund_method'];
         $returnsObject->return_product_paid_amount = $rowPaid + $applied;
         $returnsObject->return_product_updated = date("Y-m-d H:i:s");
         checkUpdate($returnsObject);
