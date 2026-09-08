@@ -570,7 +570,20 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                       </div>
                     )}
                   </div>
-
+                  {creditMemoBalance > 0 ? (
+                    <div className="mt-2 p-1 bg-gray-50 ">
+                      <p className="mb-0! flex ">
+                        NOTE: Credit memo available amount:
+                        <AmountsWithPesoSign
+                          classN={"size-3"}
+                          classAmnt="justify-start! ml-1"
+                          amount={creditMemoBalance}
+                        />
+                      </p>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                   <div className="flex my-7 justify-between items-center">
                     <label htmlFor="">Order Items</label>
                     <button
@@ -809,6 +822,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                               type="number"
                               name="sales_order_cash"
                               disabled={mutation.isPending}
+                              required={false}
                             />
                           </div>
                           <div className="relative ">
@@ -817,6 +831,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                               type="number"
                               name="sales_order_check"
                               disabled={mutation.isPending}
+                              required={false}
                             />
                           </div>
                           <div className="relative ">
@@ -825,6 +840,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                               type="number"
                               name="sales_order_online_transaction"
                               disabled={mutation.isPending}
+                              required={false}
                             />
                           </div>
                           {creditMemoBalance > 0 ? (
@@ -834,6 +850,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                                 type="number"
                                 name="sales_order_credit_memo"
                                 disabled={mutation.isPending}
+                                required={false}
                               />
                             </div>
                           ) : (

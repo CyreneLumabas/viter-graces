@@ -96,7 +96,7 @@ foreach ($purchaseOrderItems as $item) {
     $val->purchase_order_product_name = $item["purchase_order_product_name"] ?? "";
     $val->purchase_order_product_owner_id = (int)($item["purchase_order_product_owner_id"] ?? 0);
     $val->purchase_order_product_owner_name = $item["purchase_order_product_owner_name"] ?? "";
-    $val->purchase_order_delivery_is_status = $item["purchase_order_delivery_is_status"] ?? 0;
+    $val->purchase_order_delivery_is_status = (int)($item["purchase_order_delivery_is_status"] ?? false);
     $val->purchase_order_qty = $item["purchase_order_qty"] ?? 0;
     $val->purchase_order_price = $item["purchase_order_price"] ?? 0;
     $val->purchase_order_total_amount = $itemTotalAmount;

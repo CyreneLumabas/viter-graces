@@ -105,7 +105,7 @@ const ModalReturns = ({ itemEdit }) => {
     ),
     return_product_resolution_type: isEmptyItem(
       itemEdit?.return_product_resolution_type,
-      "other",
+      "",
     ),
     return_product_refund_method: isEmptyItem(
       itemEdit?.return_product_refund_method,
