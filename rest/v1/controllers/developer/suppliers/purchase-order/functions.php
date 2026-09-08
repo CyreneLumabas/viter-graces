@@ -82,8 +82,8 @@ function checkDeleteById($object)
 function deliveryStatus($val, $data)
 {
 
-    $purchase_order = $data["purchase_order"];
-    $isHaveNotDelivered = $data["isHaveNotDelivered"];
+    $purchase_order = $data["purchase_order"] ?? [];
+    $isHaveNotDelivered = $data["isHaveNotDelivered"] ?? 0;
 
     $val->purchase_order_delivery_status = "for delivery";
 

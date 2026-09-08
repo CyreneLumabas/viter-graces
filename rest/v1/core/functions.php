@@ -47,7 +47,12 @@ function checkDbConnection()
     }
 }
 
-function checkQuery($query, $msg)
+// $detail, when provided, is the real underlying PDOException message the
+// model caught and swallowed (see e.g. SuppliersPurchaseOrder::update()'s
+// lastDbError property) - appending it here is what lets the client see the
+// actual SQLSTATE/reason instead of only the generic "(update)"-style $msg,
+// without changing behavior for the many call sites that don't pass it.
+function checkQuery($query, $msg, $detail = null)
 {
     if (!$query) {
         $response = new Response();
@@ -56,7 +61,7 @@ function checkQuery($query, $msg)
         $error["count"] = 0;
         $error["success"] = false;
         $error['type'] = "invalid_request_error";
-        $error['error'] = $msg;
+        $error['error'] = $detail ? "{$msg} — {$detail}" : $msg;
         $response->setData($error);
         $response->send();
         exit;
@@ -152,7 +157,7 @@ function checkLimitId($start, $total)
 function checkCreate($object)
 {
     $query = $object->create();
-    checkQuery($query, "There's a problem processing your request. (create)");
+    checkQuery($query, "There's a problem processing your request. (create)", $object->lastDbError ?? null);
     return $query;
 }
 
@@ -373,7 +378,7 @@ function checkReadKey($object)
 function checkUpdate($object)
 {
     $query = $object->update();
-    checkQuery($query, "There's a problem processing your request. (update)");
+    checkQuery($query, "There's a problem processing your request. (update)", $object->lastDbError ?? null);
     return $query;
 }
 

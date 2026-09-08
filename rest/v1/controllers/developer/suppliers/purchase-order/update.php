@@ -45,7 +45,7 @@ $expectedDeliveryDate = date('Y-m-d', strtotime('next ' . $suppliersDeliveryDay)
 // Populate static purchase order properties
 $val->purchase_order_aid = $_GET['id'];
 $val->purchase_order_number = $data["purchase_order_number"] ?? "";
-$val->purchase_order_supplier_id = $data["purchase_order_supplier_id"] ?? "";
+$val->purchase_order_supplier_id = (int)($data["purchase_order_supplier_id"] ?? 0);
 $val->purchase_order_supplier_name = $data["purchase_order_supplier_name"] ?? "";
 $val->purchase_order_date = $data["purchase_order_date"] ?? "";
 $val->purchase_order_expected_delivery = $expectedDeliveryDate;
@@ -92,9 +92,9 @@ foreach ($purchaseOrderItems as $item) {
 
     // Populate item properties
     $val->purchase_order_aid = $itemAid;
-    $val->purchase_order_product_id = $item["purchase_order_product_id"] ?? "";
+    $val->purchase_order_product_id = (int)($item["purchase_order_product_id"] ?? 0);
     $val->purchase_order_product_name = $item["purchase_order_product_name"] ?? "";
-    $val->purchase_order_product_owner_id = $item["purchase_order_product_owner_id"] ?? "";
+    $val->purchase_order_product_owner_id = (int)($item["purchase_order_product_owner_id"] ?? 0);
     $val->purchase_order_product_owner_name = $item["purchase_order_product_owner_name"] ?? "";
     $val->purchase_order_delivery_is_status = $item["purchase_order_delivery_is_status"] ?? 0;
     $val->purchase_order_qty = $item["purchase_order_qty"] ?? 0;

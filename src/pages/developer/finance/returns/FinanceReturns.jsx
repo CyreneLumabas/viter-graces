@@ -4,7 +4,7 @@ import {
 } from "@/components/inputs/InputSelect";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
-import { ActiveInActiveStatus } from "@/layout/ArrayValue";
+import { ActiveInActiveStatus, RefundMethodList } from "@/layout/ArrayValue";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 
@@ -64,9 +64,18 @@ const FinanceReturns = () => {
       accessorKey: "return_product_refund_method",
       header: "Refund Method",
       classTh: "min-w-40",
-      classTd: "capitalize",
-      meta: "",
-      cell: (info) => info.getValue() || "—",
+      classTd: "capitalize ",
+      // meta: "",
+      // cell: (info) => info.getValue() || "—",
+      meta: {
+        filterComponent: (column) => (
+          <SearchableSelectFilterStatus
+            column={column}
+            options={RefundMethodList()}
+            uppercase="capitalize! "
+          />
+        ),
+      },
     },
     {
       accessorKey: "return_product_amount",

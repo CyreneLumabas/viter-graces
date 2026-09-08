@@ -41,7 +41,7 @@ $suppliersDeliveryDay = strtolower($data['suppliers_delivery'] ?? 'monday');
 $expectedDeliveryDate = date('Y-m-d', strtotime('next ' . $suppliersDeliveryDay));
 
 // Map static attributes to the purchase order object
-$val->purchase_order_supplier_id = $data["purchase_order_supplier_id"];
+$val->purchase_order_supplier_id = (int)($data["purchase_order_supplier_id"] ?? 0);
 $val->purchase_order_supplier_name = $data["purchase_order_supplier_name"];
 $val->purchase_order_date = $data["purchase_order_date"];
 $val->purchase_order_payment = $payment;
@@ -94,9 +94,9 @@ foreach ($purchaseOrderItems as $item) {
     $itemTotalAmount = (float)($item["purchase_order_total_amount"] ?? 0);
 
     // Populate item-specific properties
-    $val->purchase_order_product_id = $item["purchase_order_product_id"];
+    $val->purchase_order_product_id = (int)($item["purchase_order_product_id"] ?? 0);
     $val->purchase_order_product_name = $item["purchase_order_product_name"];
-    $val->purchase_order_product_owner_id = $item["purchase_order_product_owner_id"];
+    $val->purchase_order_product_owner_id = (int)($item["purchase_order_product_owner_id"] ?? 0);
     $val->purchase_order_product_owner_name = $item["purchase_order_product_owner_name"];
     $val->purchase_order_qty = $item["purchase_order_qty"];
     $val->purchase_order_before_qty = 0;

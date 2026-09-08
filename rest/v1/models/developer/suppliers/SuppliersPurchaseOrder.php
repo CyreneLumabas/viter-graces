@@ -46,6 +46,10 @@ class SuppliersPurchaseOrder
 
     public $connection;
     public $lastInsertedId;
+    // set by create()/update() when their PDOException catch block fires -
+    // read back by checkCreate()/checkUpdate() (core/functions.php) so the
+    // API response can include the real DB error, not just a generic message
+    public $lastDbError;
     public $tblSuppliersPurchaseOrder;
     public $tblSuppliers;
 
@@ -184,6 +188,7 @@ class SuppliersPurchaseOrder
             $this->lastInsertedId = $this->connection->lastInsertId();
         } catch (PDOException $ex) {
             logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $this->lastDbError = $ex->getMessage();
             $query = false;
         }
         return $query;
@@ -475,6 +480,7 @@ class SuppliersPurchaseOrder
             ]);
         } catch (PDOException $ex) {
             logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $this->lastDbError = $ex->getMessage();
             $query = false;
         }
         return $query;
