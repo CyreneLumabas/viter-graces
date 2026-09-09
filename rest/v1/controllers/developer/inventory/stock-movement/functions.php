@@ -25,3 +25,11 @@ function allowedColumns()
     ];
     return $query;
 }
+
+// Read all
+function checkReadAllLocation($object, $allowedColumns = [])
+{
+    $query = $object->readAllLocation($allowedColumns);
+    checkQuery($query, "Empty records. (read all location)");
+    return $query;
+}
