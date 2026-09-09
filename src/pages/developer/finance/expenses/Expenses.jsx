@@ -1,4 +1,4 @@
-import { SearchableSelectFilter } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActionTableList } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -7,6 +7,8 @@ import { ProductOwnerId } from "@/utilities/productOwnerToken";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
 import React from "react";
 import ModalExpenses from "./ModalExpenses";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
 
 const Expenses = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -41,9 +43,10 @@ const Expenses = () => {
       header: "Products",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -57,16 +60,27 @@ const Expenses = () => {
       amount: true,
       classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-paid-amount"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "formated_date",
       header: "Date",
       classTh: "w-[10rem]",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-date"} />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []
@@ -76,9 +90,10 @@ const Expenses = () => {
             header: "Product Owner",
             classTh: "min-w-[10rem]",
             classTd: "",
+            filterFn: "multiSelect",
             meta: {
               filterComponent: (column) => (
-                <SearchableSelectFilter
+                <MultiSelectCheckboxFilter
                   column={column}
                   path="product-owner/read-by-product-owner"
                   testFilterId={"filter-owner"}

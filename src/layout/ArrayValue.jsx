@@ -6,18 +6,19 @@ import {
   RotateCcw,
   Trash,
 } from "lucide-react";
+import { statusToBit } from "@/utilities/statusToBit";
 
 export const ActiveInActiveStatus = (val = "default-status") => {
   const result = [
     {
       name: ["default-status"],
       label: "Active",
-      value: 1,
+      value: statusToBit("Active"),
     },
     {
       name: ["default-status"],
       label: "Inactive",
-      value: 0,
+      value: statusToBit("Inactive"),
     },
     {
       name: ["installment-status"],
@@ -31,18 +32,18 @@ export const ActiveInActiveStatus = (val = "default-status") => {
     },
     {
       name: ["ar-finance"],
-      label: "Due soon",
-      value: "Due soon",
+      label: "Due Soon",
+      value: "Due Soon",
     },
     {
       name: ["ar-finance"],
-      label: "Due tomorrow",
-      value: "Due tomorrow",
+      label: "Due Tomorrow",
+      value: "Due Tomorrow",
     },
     {
       name: ["ar-finance"],
-      label: "Due today",
-      value: "Due today",
+      label: "Due Today",
+      value: "Due Today",
     },
     {
       name: ["ar-finance"],
@@ -261,17 +262,18 @@ export const ActiveInActiveStatus = (val = "default-status") => {
       value: "processed",
     },
     {
-      // return_product_is_restocked is stored as 0/1 in the DB (see isYesOrNo
-      // utility), not "yes"/"no" strings - values must match the raw column
-      // for the server-side LIKE filter to find anything.
+      // return_product_is_restocked is stored as 0/1 in the DB (see
+      // isYesOrNo, the reverse display-side helper) - statusToBit keeps the
+      // filter value in that same shape while the checkbox still shows the
+      // friendly "Yes"/"No" label.
       name: ["restocked-status"],
-      label: "YES",
-      value: "1",
+      label: "Yes",
+      value: statusToBit("Yes"),
     },
     {
       name: ["restocked-status"],
-      label: "NO",
-      value: "0",
+      label: "No",
+      value: statusToBit("No"),
     },
     {
       name: ["purchase-movement-status"],

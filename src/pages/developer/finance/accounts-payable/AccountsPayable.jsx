@@ -1,15 +1,14 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActionTableList, ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 import React from "react";
 import UpdateAccountsPayableDetails from "./UpdateAccountsPayableDetails";
 import ViewAccountsPayableDetails from "./ViewAccountsPayableDetails";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
 
 const AccountsPayable = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -29,12 +28,15 @@ const AccountsPayable = () => {
       classTh: "min-w-[9rem]",
       classTd: "min-w-[9rem]",
       status_option: ActiveInActiveStatus("purchase-order-payment-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-order-payment-status")}
+            staticOptions={ActiveInActiveStatus(
+              "purchase-order-payment-status",
+            ).map((option) => option.value)}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -51,17 +53,22 @@ const AccountsPayable = () => {
       header: "Purchase Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-purchase-date"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_product_name",
       header: "Products",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -90,8 +97,12 @@ const AccountsPayable = () => {
       amount: true,
       classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
     {
       accessorKey: "paid_amount",
@@ -99,8 +110,12 @@ const AccountsPayable = () => {
       amount: true,
       classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-paid"} />
+        ),
+      },
     },
     {
       accessorKey: "balance_amount",
@@ -108,8 +123,12 @@ const AccountsPayable = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? [

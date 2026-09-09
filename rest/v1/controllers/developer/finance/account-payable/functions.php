@@ -16,7 +16,10 @@ function allowedColumns()
         "purchase_order_product_owner_name",
         "purchase_order_qty",
         "purchase_order_payment",
-        // "payment_status" (aliased from purchase_order_payment_status),
+        // aliased from purchase_order_payment_status - mapped back to the
+        // real column via $columnAliasMap in AccountPayable.php's
+        // buildFilterColumns() before it reaches the WHERE clause
+        "payment_status",
         // "amount", "paid_amount" and "balance_amount" are computed/SUM()
         // aggregate aliases in AccountPayable.php's readAll()/readLimit()
         // and can't be referenced in a WHERE clause

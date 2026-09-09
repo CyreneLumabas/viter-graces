@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -9,6 +6,8 @@ import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ModalPurchaseOrderMovement from "./modal/ModalPurchaseOrderMovement";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const PurchaseOrderMovement = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -22,12 +21,15 @@ const PurchaseOrderMovement = () => {
       classTh: "min-w-[8rem]",
       classTd: "min-w-[8rem]",
       status_option: ActiveInActiveStatus("purchase-movement-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-movement-status")}
+            staticOptions={ActiveInActiveStatus("purchase-movement-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -45,9 +47,10 @@ const PurchaseOrderMovement = () => {
       header: "Supplier",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="suppliers"
             testFilterId={"filter-supplier"}
@@ -60,9 +63,10 @@ const PurchaseOrderMovement = () => {
       header: "Product Owner",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-product-owner"
             testFilterId={"filter-owner"}
@@ -73,26 +77,38 @@ const PurchaseOrderMovement = () => {
     {
       accessorKey: "purchase_order_qty",
       header: "quantity",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "w-[10rem] min-w-[10rem] ",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-qty"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_before_qty",
       header: "before",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "w-[10rem] min-w-[10rem] ",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-before"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_after_qty",
       header: "after",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "w-[10rem] min-w-[10rem] ",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-after"} />
+        ),
+      },
     },
     {
       accessorKey: "formated_date",
@@ -100,16 +116,24 @@ const PurchaseOrderMovement = () => {
       orderNumber: "2",
       classTh: "min-w-[7rem] ",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-order-date"} />
+        ),
+      },
     },
     {
       accessorKey: "formated_delivery_date",
       header: "expected delivery",
       classTh: "min-w-[10rem] ",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-delivery-date"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_transfer_note",

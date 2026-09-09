@@ -56,6 +56,81 @@ class Products
         $this->tblReturnProduct = "graces_return_product";
     }
 
+    // Builds the "columnFilters" WHERE fragments shared by every read*()
+    // method below, and writes the matching bound params into &$params.
+    // - {min, max} value        -> numeric BETWEEN (e.g. price/cost/stocks range)
+    // - [{min,max}, ...] value  -> multi-range OR match, several BETWEENs
+    //                              stacked with OR (e.g. price in 0-10 OR 50-100)
+    // - array value             -> multi-select OR match via IN (...)
+    // - plain value             -> single LIKE match (legacy single-select filter)
+    private function buildFilterColumns($allowedColumns, &$params)
+    {
+        $filterColumn = [];
+
+        foreach ($this->filters as $i => $item) {
+            if (!in_array($item['id'], $allowedColumns, true)) {
+                continue;
+            }
+            $col = $item['id'];
+            $value = $item['value'];
+
+            if (is_array($value) && array_key_exists('min', $value)) {
+                $params["min$i"] = (float) $value['min'];
+                $filterColumn[] = " CAST($col AS UNSIGNED) BETWEEN :min$i AND :max$i";
+
+                $params["max$i"] = $value['max'] === ""
+                    ? (float) $this->max
+                    : (float) $value['max'];
+            } elseif (is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasMin = isset($range['min']) && $range['min'] !== '';
+                    $hasMax = isset($range['max']) && $range['max'] !== '';
+
+                    if (!$hasMin && !$hasMax) {
+                        continue;
+                    }
+
+                    $minKey = "range{$i}_{$j}_min";
+                    $maxKey = "range{$i}_{$j}_max";
+                    $params[$minKey] = $hasMin ? (float) $range['min'] : 0.0;
+                    $params[$maxKey] = $hasMax ? (float) $range['max'] : (float) $this->max;
+                    $rangeClauses[] = "CAST($col AS UNSIGNED) BETWEEN :$minKey AND :$maxKey";
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value)) {
+                $selectedValues = array_values(array_filter(
+                    $value,
+                    fn($v) => trim((string) $v) !== ""
+                ));
+
+                if (empty($selectedValues)) {
+                    continue;
+                }
+
+                $placeholders = [];
+                foreach ($selectedValues as $j => $selectedValue) {
+                    $paramKey = "filter{$i}_{$j}";
+                    $placeholders[] = ":$paramKey";
+                    $params[$paramKey] = trim($selectedValue);
+                }
+
+                $filterColumn[] = "$col IN (" . implode(", ", $placeholders) . ")";
+            } else {
+                $filterColumn[] = "$col LIKE :search$i";
+                $params["search$i"] = "%" . trim($value) . "%";
+            }
+        }
+
+        return $filterColumn;
+    }
+
     // create
     public function create()
     {
@@ -262,23 +337,7 @@ class Products
             ] : [],
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-                $filterColumn[] = " CAST($col AS UNSIGNED) BETWEEN :min$i AND :max$i";
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select *, ";
             $sql .= "products_aid as id, ";
@@ -289,9 +348,9 @@ class Products
             if (!empty($filterColumn)) {
                 $sql .= " and " . implode(" and ", $filterColumn);
             } else {
-                $sql .= ($this->column_search != "" ? "and ( products_name like :products_name 
-            or products_owner_name like :products_owner_name 
-            or products_suppliers_name like :products_suppliers_name 
+                $sql .= ($this->column_search != "" ? "and ( products_name like :products_name
+            or products_owner_name like :products_owner_name
+            or products_suppliers_name like :products_suppliers_name
             or products_sku like :products_sku ) " : " ");
             }
             $sql .= " order by products_is_active desc, ";
@@ -309,7 +368,6 @@ class Products
     // read all
     public function readLimit($allowedColumns)
     {
-        $filterColumn = [];
         $params = [
             "start" => $this->column_start - 1,
             "total" => $this->column_total,
@@ -321,23 +379,7 @@ class Products
             ] : [],
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-                $filterColumn[] = " CAST($col AS UNSIGNED) BETWEEN :min$i AND :max$i";
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select *, ";
             $sql .= "products_aid as id, ";
@@ -370,7 +412,6 @@ class Products
     // read all
     public function readByUserId($allowedColumns)
     {
-        $filterColumn = [];
         $params = [
             "products_owner_id" => $this->userId,
             ...$this->column_search != "" ? [
@@ -381,23 +422,7 @@ class Products
             ] : [],
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select *, ";
             $sql .= "products_aid as id, ";
@@ -427,7 +452,6 @@ class Products
     // read all
     public function readByUserIdLimit($allowedColumns)
     {
-        $filterColumn = [];
         $params = [
             "start" => $this->column_start - 1,
             "total" => $this->column_total,
@@ -440,23 +464,7 @@ class Products
             ] : [],
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-                $filterColumn[] = " CAST($col AS UNSIGNED) BETWEEN :min$i AND :max$i";
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select *, ";
             $sql .= "products_aid as id, ";
@@ -894,26 +902,8 @@ class Products
     // read all
     public function readAllActive($allowedColumns)
     {
-        $filterColumn = [];
         $params = [];
-
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-                $filterColumn[] = " CAST($col AS UNSIGNED) BETWEEN :min$i AND :max$i";
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select *, ";
             $sql .= "products_aid as id, ";
@@ -926,6 +916,56 @@ class Products
             }
             $sql .= " order by products_is_active desc, ";
             $sql .= "products_name asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readAllSku($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "products_sku as name ";
+            $sql .= "from {$this->tblProducts} ";
+            $sql .= " where true ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by products_sku ";
+            $sql .= " order by products_sku desc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readAllUnit($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "products_unit as name ";
+            $sql .= "from {$this->tblProducts} ";
+            $sql .= " where true ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by products_unit ";
+            $sql .= " order by products_unit desc ";
             $query = $this->connection->prepare($sql);
             $query->execute($params);
         } catch (PDOException $ex) {

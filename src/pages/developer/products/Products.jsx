@@ -1,7 +1,5 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 import { ActiveInActiveStatus, ActionTableList } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -22,13 +20,13 @@ const Products = () => {
       header: "status",
       classTh: "min-w-[8rem]",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus()}
-            testFilterStatusId={"filter-status"}
+            staticOptions={ActiveInActiveStatus()}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -40,9 +38,10 @@ const Products = () => {
       classTh: "min-w-[10rem] ",
       classTd: "",
       isMobileTitle: true,
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -56,16 +55,26 @@ const Products = () => {
       classTh: "min-w-[10rem] ",
       classTd: "",
       isTag: true,
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path="products/read-all-by-sku"
+            testFilterId={"filter-product-sku"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "products_category",
       header: "Category",
       classTh: " min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-category"
             testFilterId={"filter-category"}
@@ -78,27 +87,48 @@ const Products = () => {
       header: "Price",
       classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "between",
+      filterFn: "multiRange",
       isPrice: true,
       amount: true,
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-price"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "products_cost",
       header: "Estimated Cost Price",
       classTh: "min-w-[12rem]",
       classTd: "",
-      filterFn: "between",
+      filterFn: "multiRange",
       amount: true,
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-cost"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "products_stocks",
       header: "Stocks",
       classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-stocks"}
+          />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []
@@ -108,9 +138,10 @@ const Products = () => {
             header: "Product Owner",
             classTh: "min-w-[10rem]",
             classTd: "",
+            filterFn: "multiSelect",
             meta: {
               filterComponent: (column) => (
-                <SearchableSelectFilter
+                <MultiSelectCheckboxFilter
                   column={column}
                   path="product-owner/read-by-product-owner"
                   testFilterId={"filter-owner"}

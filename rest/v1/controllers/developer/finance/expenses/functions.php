@@ -24,9 +24,7 @@ function allowedColumns()
         "purchase_order_product_name",
         "purchase_order_product_owner_name",
         "purchase_order_total_paid_per_product",
-        // "formated_date" is a DATE_FORMAT(...) computed alias (real
-        // column is purchase_order_date) and can't be referenced in a
-        // WHERE clause under this filter id
+        "formated_date",
     ];
     return $query;
 }

@@ -8,9 +8,10 @@ import React from "react";
 import ModalCustomer from "./ModalCustomer";
 import ModalSalesOrders from "./ModalSalesOrders";
 import ViewCustomerDetails from "./ViewCustomerDetails";
-import { SearchableSelectFilterStatus } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const Customers = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -23,13 +24,13 @@ const Customers = () => {
       header: "status",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus()}
-            testFilterStatusId={"filter-status"}
+            staticOptions={ActiveInActiveStatus()}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -63,8 +64,15 @@ const Customers = () => {
       header: "Number of Orders",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-num-orders"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "total_amount_spent",
@@ -72,8 +80,15 @@ const Customers = () => {
       amount: true,
       classTh: "min-w-45",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-total-spent"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "outstanding_balance",
@@ -86,8 +101,15 @@ const Customers = () => {
       amount: true,
       classTh: "min-w-45 ",
       classTd: " ",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-outstanding-balance"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "open_credit_memo",
@@ -98,8 +120,15 @@ const Customers = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-credit-memo"}
+          />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []

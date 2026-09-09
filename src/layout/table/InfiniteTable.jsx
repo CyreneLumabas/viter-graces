@@ -28,6 +28,29 @@ import MobileResponsiveList from "../mobile-responsive/MobileResponsiveList";
 import ModalAction from "../modal/ModalAction";
 import { renderCellContent } from "./function-table";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
+import ActiveFilterTagBar from "./ActiveFilterTagBar";
+
+// Shared by the dateRange/multiDateRange filterFns below. Columns vary
+// between raw ISO dates ("2026-09-03") and formatted display aliases
+// ("Sep 03, 2026"). Rather than compare Date objects (an ISO date-only
+// string parses as UTC midnight, but "Sep 03, 2026" parses as LOCAL midnight
+// - mixing the two silently shifts the comparison by a day in any non-UTC
+// timezone), normalize everything to a plain "YYYY-MM-DD" string first and
+// compare those lexically. Returns null when the raw value can't be dated.
+const toDateOnlyString = (raw) => {
+  if (raw === null || raw === undefined || raw === "") return null;
+
+  const isoMatch = String(raw).match(/^\d{4}-\d{2}-\d{2}/);
+  if (isoMatch) return isoMatch[0];
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, "0");
+  const d = String(parsed.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 
 const InfiniteTable = ({
   columns,
@@ -56,12 +79,20 @@ const InfiniteTable = ({
     "",
   );
 
+  const todayServerDate = store.credentials?.data?.server_date;
+
   let defaultValue =
     path === "sales-order"
       ? [
           {
             id: "sales_order_date",
-            value: store.credentials?.data?.server_date,
+            value: [
+              {
+                id: "default-today",
+                start: todayServerDate,
+                end: todayServerDate,
+              },
+            ],
           },
         ]
       : [];
@@ -193,6 +224,61 @@ const InfiniteTable = ({
 
         return true;
       },
+      // multi-select filter: OR the checked values together. Values are
+      // usually strings (e.g. "paid", "cash"), but some columns (is_active,
+      // restocked) filter on 0/1 - stringify both sides so a numeric filter
+      // value still matches a numeric or string row value either way.
+      multiSelect: (row, columnId, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+
+        return value
+          .map(String)
+          .includes(String(row.getValue(columnId)));
+      },
+      // date range filter: pair with DateRangeFilter (InputRangeFilter.jsx).
+      dateRange: (row, columnId, value) => {
+        const { start, end } = value || {};
+        if (!start && !end) return true;
+
+        const rowDateStr = toDateOnlyString(row.getValue(columnId));
+        if (rowDateStr === null) return false;
+        if (rowDateStr === undefined) return true;
+
+        if (start && rowDateStr < start) return false;
+        if (end && rowDateStr > end) return false;
+
+        return true;
+      },
+      // multi-range filter: pair with MultiRangeAmountFilter
+      // (InputRangeFilter.jsx). A row matches if it falls inside ANY of the
+      // selected [min, max] ranges (OR'd together).
+      multiRange: (row, columnId, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+
+        const rowValue = row.getValue(columnId);
+
+        return value.some(({ min, max }) => {
+          if (min !== undefined && min !== "" && rowValue < min) return false;
+          if (max !== undefined && max !== "" && rowValue > max) return false;
+          return true;
+        });
+      },
+      // multi-range date filter: pair with MultiRangeDateFilter
+      // (InputRangeFilter.jsx). A row matches if its date falls inside ANY of
+      // the selected start/end spans (OR'd together).
+      multiDateRange: (row, columnId, value) => {
+        if (!Array.isArray(value) || value.length === 0) return true;
+
+        const rowDateStr = toDateOnlyString(row.getValue(columnId));
+        if (rowDateStr === null) return false;
+        if (rowDateStr === undefined) return true;
+
+        return value.some(({ start, end }) => {
+          if (start && rowDateStr < start) return false;
+          if (end && rowDateStr > end) return false;
+          return true;
+        });
+      },
     },
   });
 
@@ -268,16 +354,21 @@ const InfiniteTable = ({
                   <input
                     type={"date"}
                     defaultValue={
-                      isEmptyItem(columnFilters[0]["value"]?.min, "") === "" &&
-                      isEmptyItem(columnFilters[0]["value"]?.max, "") === ""
-                        ? isEmptyItem(columnFilters[0]["value"], "")
+                      Array.isArray(columnFilters[0]["value"])
+                        ? isEmptyItem(columnFilters[0]["value"][0]?.start, "")
                         : ""
                     }
                     onChange={(e) => {
                       setColumnFilters([
                         {
                           id: "sales_order_date",
-                          value: e.target.value,
+                          value: [
+                            {
+                              id: "mobile-quick-filter",
+                              start: e.target.value,
+                              end: e.target.value,
+                            },
+                          ],
                         },
                       ]);
                     }}
@@ -298,38 +389,11 @@ const InfiniteTable = ({
           </div>
         )}
       </div>
-      {columnFilters?.length > 0 && (
-        <>
-          <ul className="lg:hidden mb-2 flex items-center flex-wrap gap-2">
-            <li>Filtered by:</li>
-            {columnFilters?.map((a, key) => {
-              return typeof a.value !== "object" ? (
-                <li
-                  key={key}
-                  className="bg-gray-100 px-2 py-1 rounded-sm dark:text-gray-800"
-                >
-                  {a.value}
-                </li>
-              ) : (
-                <li key={key} className="bg-gray-100 px-2 py-1 rounded-sm">
-                  {isEmptyItem(a.value?.min, "0 ")} -
-                  {isEmptyItem(a.value?.max, " max amount")}
-                </li>
-              );
-            })}
-
-            <li className="bg-gray-400 cursor-pointer hover:bg-primary text-white px-2 py-1 rounded-sm">
-              <button
-                onClick={() => {
-                  setColumnFilters([]);
-                }}
-              >
-                Clear
-              </button>
-            </li>
-          </ul>
-        </>
-      )}
+      <ActiveFilterTagBar
+        table={table}
+        columnFilters={columnFilters}
+        setColumnFilters={setColumnFilters}
+      />
       <div className="">
         <div className="relative rounded-xl md:text-center overflow-auto z-0 ">
           <div className={`${className} `}>

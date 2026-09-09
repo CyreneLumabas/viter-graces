@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActionTableList, ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -10,6 +7,8 @@ import { ProductOwnerIdOnly } from "@/utilities/productOwnerToken";
 import React from "react";
 import UpdateAccountsReceivableDetails from "./UpdateAccountsReceivableDetails";
 import ViewAccountsReceivableDetails from "./ViewAccountsReceivableDetails";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
 
 const AccountsReceivable = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -28,12 +27,15 @@ const AccountsReceivable = () => {
       header: "status",
       classTh: "min-w-40!",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("ar-finance")}
+            staticOptions={ActiveInActiveStatus("ar-finance").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -51,16 +53,27 @@ const AccountsReceivable = () => {
       header: "Due date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-due-date"} />
+        ),
+      },
     },
     {
       accessorKey: "days_overdue",
       header: "Days Overdue",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-days-overdue"}
+          />
+        ),
+      },
       cell: (info) => (Number(info.getValue()) > 0 ? info.getValue() : "-"),
     },
     {
@@ -68,8 +81,12 @@ const AccountsReceivable = () => {
       header: "Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-sales-date"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_customer_name",
@@ -77,9 +94,10 @@ const AccountsReceivable = () => {
       classTh: "min-w-[10rem] ",
       classTd: "",
       isMobileTitle: true,
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -92,9 +110,10 @@ const AccountsReceivable = () => {
       header: "Products",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -115,8 +134,12 @@ const AccountsReceivable = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_paid_amount",
@@ -124,8 +147,12 @@ const AccountsReceivable = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-paid"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_total_balance_amount",
@@ -133,8 +160,12 @@ const AccountsReceivable = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
     ...(Number(ProductOwnerIdOnly(store)) > 0
       ? [

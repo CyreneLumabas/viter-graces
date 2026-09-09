@@ -40,6 +40,88 @@ class StockOverview
         $this->tblSalesOrder = "graces_sales_order";
     }
 
+    // Builds the "columnFilters" WHERE fragments shared by every read*()
+    // method below, and writes the matching bound params into &$params.
+    // - inventory_status  -> handled by callers that pass &$inventoryStatusFilter
+    //                        (captured here, not added to $filterColumn)
+    // - {min, max} value  -> numeric BETWEEN (range filter)
+    // - array value       -> multi-select OR match via IN (...)
+    // - plain value       -> single LIKE match (legacy single-select filter)
+    private function buildFilterColumns($allowedColumns, &$params, &$inventoryStatusFilter = null)
+    {
+        $filterColumn = [];
+
+        foreach ($this->filters as $i => $item) {
+            if (!in_array($item['id'], $allowedColumns, true)) {
+                continue;
+            }
+
+            if ($inventoryStatusFilter !== null && $item['id'] === 'inventory_status') {
+                $inventoryStatusFilter = strtolower(trim($item['value']));
+                continue;
+            }
+
+            $col = $item['id'];
+            $value = $item['value'];
+
+            if (is_array($value) && array_key_exists('min', $value)) {
+                $params["min$i"] = (float) $value['min'];
+
+                $params["max$i"] = $value['max'] === ""
+                    ? (float) $this->max
+                    : (float) $value['max'];
+
+                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
+            } elseif (is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasMin = isset($range['min']) && $range['min'] !== '';
+                    $hasMax = isset($range['max']) && $range['max'] !== '';
+
+                    if (!$hasMin && !$hasMax) {
+                        continue;
+                    }
+
+                    $minKey = "range{$i}_{$j}_min";
+                    $maxKey = "range{$i}_{$j}_max";
+                    $params[$minKey] = $hasMin ? (float) $range['min'] : 0.0;
+                    $params[$maxKey] = $hasMax ? (float) $range['max'] : (float) $this->max;
+                    $rangeClauses[] = "$col BETWEEN :$minKey AND :$maxKey";
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value)) {
+                $selectedValues = array_values(array_filter(
+                    $value,
+                    fn ($v) => trim((string) $v) !== ""
+                ));
+
+                if (empty($selectedValues)) {
+                    continue;
+                }
+
+                $placeholders = [];
+                foreach ($selectedValues as $j => $selectedValue) {
+                    $paramKey = "filter{$i}_{$j}";
+                    $placeholders[] = ":$paramKey";
+                    $params[$paramKey] = trim($selectedValue);
+                }
+
+                $filterColumn[] = "$col IN (" . implode(", ", $placeholders) . ")";
+            } else {
+                $filterColumn[] = "$col LIKE :search$i";
+                $params["search$i"] = "%" . trim($value) . "%";
+            }
+        }
+
+        return $filterColumn;
+    }
+
     public function readAllLowStock()
     {
         try {
@@ -370,30 +452,7 @@ class StockOverview
             ),
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            // Special handling for inventory_status
-            if ($item['id'] === 'inventory_status') {
-                $inventoryStatusFilter = strtolower(trim($item['value']));
-                continue;
-            }
-
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-
-                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params, $inventoryStatusFilter);
         try {
             $sql = " select inventory_data.*, ";
             $sql .= "CASE WHEN inventory_data.current_qty <= 0 THEN 'out of stock' ";
@@ -479,32 +538,7 @@ class StockOverview
             ),
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-
-            // Special handling for inventory_status
-            if ($item['id'] === 'inventory_status') {
-                $inventoryStatusFilter = strtolower(trim($item['value']));
-                continue;
-            }
-
-            $col = $item['id'];
-
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-
-                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params, $inventoryStatusFilter);
 
         try {
             $sql = " select inventory_data.*, ";
@@ -594,31 +628,7 @@ class StockOverview
             ),
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-            // Special handling for inventory_status
-            if ($item['id'] === 'inventory_status') {
-                $inventoryStatusFilter = strtolower(trim($item['value']));
-                continue;
-            }
-
-
-            $col = $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-
-                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params, $inventoryStatusFilter);
         try {
             $sql = " select inventory_data.*, ";
             $sql .= "CASE WHEN inventory_data.current_qty <= 0 THEN 'out of stock' ";
@@ -706,32 +716,7 @@ class StockOverview
             ),
         ];
 
-        foreach ($this->filters as $i => $item) {
-            if (!in_array($item['id'], $allowedColumns, true)) {
-                continue;
-            }
-
-            // Special handling for inventory_status
-            if ($item['id'] === 'inventory_status') {
-                $inventoryStatusFilter = strtolower(trim($item['value']));
-                continue;
-            }
-
-            $col = $item['id'];
-
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
-
-                $params["max$i"] = $item['value']['max'] === ""
-                    ? (float) $this->max
-                    : (float) $item['value']['max'];
-
-                $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
-            } else {
-                $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
-            }
-        }
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params, $inventoryStatusFilter);
 
         try {
             $sql = " select inventory_data.*, ";

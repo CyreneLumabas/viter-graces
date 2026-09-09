@@ -28,6 +28,7 @@ function allowedColumns()
         "role_code",
         "role_name",
         "role_description",
+        "role_is_active",
     ];
     return $query;
 }

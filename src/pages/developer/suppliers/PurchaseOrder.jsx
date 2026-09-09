@@ -4,13 +4,14 @@ import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ModalPurchaseOrder from "./modal/ModalPurchaseOrder";
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { setIsAdd } from "@/store/StoreAction";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
 import ViewAccountsPayableDetails from "./modal/ViewAccountsPayableDetails";
+import {
+  MultiRangeAmountFilter,
+  MultiRangeDateFilter,
+} from "@/components/inputs/InputRangeFilter";
 
 const PurchaseOrder = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -24,12 +25,15 @@ const PurchaseOrder = () => {
       classTh: "min-w-[8rem]",
       classTd: "min-w-[8rem]",
       status_option: ActiveInActiveStatus("purchase-order-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-order-status")}
+            staticOptions={ActiveInActiveStatus("purchase-order-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -40,12 +44,15 @@ const PurchaseOrder = () => {
       classTh: "min-w-[9rem]",
       classTd: "min-w-[9rem]",
       status_option: ActiveInActiveStatus("purchase-order-payment-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-order-payment-status")}
+            staticOptions={ActiveInActiveStatus(
+              "purchase-order-payment-status",
+            ).map((option) => option.value)}
+            testFilterId={"filter-payment-status"}
           />
         ),
       },
@@ -63,9 +70,10 @@ const PurchaseOrder = () => {
       header: "Supplier",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="suppliers"
             testFilterId={"filter-supplier"}
@@ -79,44 +87,73 @@ const PurchaseOrder = () => {
       orderNumber: "2",
       classTh: "min-w-[7rem] ",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter
+            column={column}
+            testFilterId={"filter-order-date"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "formated_delivery_date",
       header: "expected delivery",
       classTh: "min-w-[10rem] ",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-delivery-date"} />
+        ),
+      },
     },
     {
       accessorKey: "total_amount",
       header: "total amount",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-total-amount"}
+          />
+        ),
+      },
       amount: true,
       paid_amount: false,
     },
     {
       accessorKey: "purchase_order_payment",
       header: "paid amount",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-paid-amount"}
+          />
+        ),
+      },
       amount: false,
       paid_amount: true,
     },
     {
       accessorKey: "purchase_order_balance",
       header: "Balance",
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
       amount: false,
       paid_amount: true,
     },

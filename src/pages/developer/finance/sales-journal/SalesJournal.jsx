@@ -1,8 +1,10 @@
-import { SearchableSelectFilter } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const SalesJournal = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -23,17 +25,22 @@ const SalesJournal = () => {
       header: "Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-journal-date"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_journal_customer",
       header: "Customers",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -54,8 +61,12 @@ const SalesJournal = () => {
       header: "Debit",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-debit"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_journal_credit",
@@ -63,8 +74,12 @@ const SalesJournal = () => {
       header: "Credit",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-credit"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_journal_balance",
@@ -72,8 +87,12 @@ const SalesJournal = () => {
       header: "Balance",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
   ];
 

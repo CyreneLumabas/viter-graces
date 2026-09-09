@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -10,6 +7,8 @@ import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ModalStockOverview from "./modal/ModalStockOverview";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 const MovementHistory = () => {
   const { store, dispatch } = React.useContext(StoreContext);
   const [itemEdit, setItemEdit] = React.useState(null);
@@ -21,12 +20,15 @@ const MovementHistory = () => {
       header: "status",
       classTh: "w-[10rem]",
       classTd: " uppercase ",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("stock-type-status")}
+            staticOptions={ActiveInActiveStatus("stock-type-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -36,17 +38,22 @@ const MovementHistory = () => {
       header: "Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-movement-date"} />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_product_name",
       header: "Products",
       classTh: "min-w-40",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -59,24 +66,36 @@ const MovementHistory = () => {
       header: "QTY",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-qty"} />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_before_qty",
       header: "Before",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-before"} />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_after_qty",
       header: "After",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-after"} />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_location",
@@ -90,9 +109,10 @@ const MovementHistory = () => {
       header: "Product Owner",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-product-owner"
             testFilterId={"filter-owner"}

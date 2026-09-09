@@ -102,6 +102,7 @@ function allowedColumns()
         "user_account_last_name",
         "user_account_email",
         "user_account_role",
+        "user_account_is_active",
     ];
     return $query;
 }

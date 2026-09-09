@@ -3,11 +3,12 @@ import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ReportsStats from "../ReportsStats";
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
+import {
+  MultiRangeAmountFilter,
+  MultiRangeDateFilter,
+} from "@/components/inputs/InputRangeFilter";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
 
 const ApReport = () => {
@@ -22,12 +23,15 @@ const ApReport = () => {
       classTh: "min-w-[9rem]",
       classTd: "min-w-[9rem]",
       status_option: ActiveInActiveStatus("purchase-order-payment-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-order-payment-status")}
+            staticOptions={ActiveInActiveStatus(
+              "purchase-order-payment-status",
+            ).map((option) => option.value)}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -45,9 +49,10 @@ const ApReport = () => {
       header: "Products",
       classTh: "min-w-[20rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -65,10 +70,14 @@ const ApReport = () => {
     {
       accessorKey: "purchase_order_date",
       header: "Order Date",
-      filterFn: "date",
+      filterFn: "multiDateRange",
       classTh: "w-[8rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-order-date"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_total_balance_per_product",
@@ -76,8 +85,12 @@ const ApReport = () => {
       amount: true,
       classTh: "min-w-[20rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []
@@ -87,9 +100,10 @@ const ApReport = () => {
             header: "Product Owner",
             classTh: "min-w-[10rem]",
             classTd: "",
+            filterFn: "multiSelect",
             meta: {
               filterComponent: (column) => (
-                <SearchableSelectFilter
+                <MultiSelectCheckboxFilter
                   column={column}
                   path="product-owner/read-by-product-owner"
                   testFilterId={"filter-owner"}

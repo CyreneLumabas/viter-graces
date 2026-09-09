@@ -4,11 +4,12 @@ import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ReportsStats from "../ReportsStats";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { Amount } from "@/components/PesoSign";
+import {
+  MultiRangeAmountFilter,
+  MultiRangeDateFilter,
+} from "@/components/inputs/InputRangeFilter";
 
 const ExpensesReport = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -21,12 +22,15 @@ const ExpensesReport = () => {
       classTh: "min-w-[9rem]",
       classTd: "min-w-[9rem]",
       status_option: ActiveInActiveStatus("purchase-order-payment-status"),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("purchase-order-payment-status")}
+            staticOptions={ActiveInActiveStatus(
+              "purchase-order-payment-status",
+            ).map((option) => option.value)}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -42,19 +46,24 @@ const ExpensesReport = () => {
     {
       accessorKey: "purchase_order_date",
       header: "Transaction Date",
-      filterFn: "date",
+      filterFn: "multiDateRange",
       classTh: "w-[8rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-transaction-date"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_product_name",
       header: "Products",
       classTh: "min-w-[20rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -75,8 +84,12 @@ const ExpensesReport = () => {
       amount: true,
       classTh: "min-w-[20rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_total_paid_per_product",
@@ -84,8 +97,12 @@ const ExpensesReport = () => {
       amount: true,
       classTh: "min-w-[20rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-paid"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_total_balance_per_product",
@@ -93,17 +110,22 @@ const ExpensesReport = () => {
       amount: true,
       classTh: "min-w-[20rem]",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
     {
       accessorKey: "purchase_order_product_owner_name",
       header: "Product Owner",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-product-owner"
             testFilterId={"filter-owner"}

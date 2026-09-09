@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -11,6 +8,8 @@ import { getAdminDeveloperRole } from "@/utilities/roleValidation";
 import React from "react";
 import ModalReturns from "./ModalReturns";
 import { devNavUrl } from "@/config/config";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
 
 const Returns = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -26,13 +25,15 @@ const Returns = () => {
       classTh: "min-w-[10rem]",
       classTd: "min-w-[10rem]",
       updateDataColumn: getAdminDeveloperRole(store),
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("return-status")}
-            testFilterStatusId={"return-status"}
+            staticOptions={ActiveInActiveStatus("return-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -50,8 +51,12 @@ const Returns = () => {
       header: "date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-return-date"} />
+        ),
+      },
     },
     {
       accessorKey: "return_product_order_number",
@@ -67,9 +72,10 @@ const Returns = () => {
       filterOnClickId: "sales_order_customer_name",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -82,9 +88,10 @@ const Returns = () => {
       header: "Products",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -97,9 +104,10 @@ const Returns = () => {
       header: "Product Owner",
       classTh: "min-w-40 ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-product-owner"
             testFilterId={"filter-owner"}
@@ -112,13 +120,15 @@ const Returns = () => {
       header: "resolution type",
       classTh: "min-w-40 ",
       classTd: "capitalize",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("resolution-type")}
-            uppercase="capitalize! "
+            staticOptions={ActiveInActiveStatus("resolution-type").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-resolution-type"}
           />
         ),
       },
@@ -129,8 +139,12 @@ const Returns = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
     {
       accessorKey: "return_product_paid_amount",
@@ -138,8 +152,15 @@ const Returns = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-return-amount"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "return_product_reason",
@@ -153,12 +174,13 @@ const Returns = () => {
       header: "restocked",
       classTh: "min-w-30",
       classTd: "uppercase",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("restocked-status")}
+            staticOptions={ActiveInActiveStatus("restocked-status")}
+            testFilterId={"filter-restocked"}
           />
         ),
       },

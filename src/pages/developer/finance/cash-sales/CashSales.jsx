@@ -1,9 +1,11 @@
-import { SearchableSelectFilter } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
 import React from "react";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const CashSales = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -23,8 +25,12 @@ const CashSales = () => {
       header: "Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-sales-date"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_customer_name",
@@ -32,9 +38,10 @@ const CashSales = () => {
       classTh: "min-w-[10rem] ",
       classTd: "",
       isMobileTitle: true,
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -48,9 +55,10 @@ const CashSales = () => {
       classTh: "min-w-[10rem] ",
       classTd: "",
       isMobileTitle: true,
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -72,8 +80,12 @@ const CashSales = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_paid_per_product",
@@ -81,8 +93,12 @@ const CashSales = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-paid"} />
+        ),
+      },
     },
     {
       accessorKey: "total_paid_in_cash",
@@ -90,8 +106,15 @@ const CashSales = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-paid-cash"}
+          />
+        ),
+      },
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []
@@ -101,9 +124,10 @@ const CashSales = () => {
             header: "Product Owner",
             classTh: "min-w-[10rem]",
             classTd: "",
+            filterFn: "multiSelect",
             meta: {
               filterComponent: (column) => (
-                <SearchableSelectFilter
+                <MultiSelectCheckboxFilter
                   column={column}
                   path="product-owner/read-by-product-owner"
                   testFilterId={"filter-owner"}

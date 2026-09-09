@@ -224,16 +224,112 @@ class SuppliersPurchaseOrder
                 continue;
             }
             $col = $columnAliasMap[$item['id']] ?? $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
+            $value = $item['value'];
+            if (is_array($value) && array_key_exists('start', $value)) {
+                $hasStart = trim((string) $value['start']) !== '';
+                $hasEnd = trim((string) $value['end']) !== '';
+                if (!$hasStart && !$hasEnd) {
+                    continue;
+                }
+                if ($hasStart && $hasEnd) {
+                    $params["start$i"] = trim($value['start']);
+                    $params["end$i"] = trim($value['end']);
+                    $filterColumn[] = "DATE($col) BETWEEN :start$i AND :end$i";
+                } elseif ($hasStart) {
+                    $params["start$i"] = trim($value['start']);
+                    $filterColumn[] = "DATE($col) >= :start$i";
+                } else {
+                    $params["end$i"] = trim($value['end']);
+                    $filterColumn[] = "DATE($col) <= :end$i";
+                }
+            } elseif (is_array($value) && array_key_exists('min', $value)) {
+                $params["min$i"] = (float) $value['min'];
                 $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
 
-                $params["max$i"] = $item['value']['max'] === ""
+                $params["max$i"] = $value['max'] === ""
                     ? (float) $this->max
-                    : (float) $item['value']['max'];
+                    : (float) $value['max'];
+            } elseif (
+                is_array($value)
+                && isset($value[0])
+                && is_array($value[0])
+                && array_key_exists('start', $value[0])
+            ) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasStart = isset($range['start']) && trim((string) $range['start']) !== '';
+                    $hasEnd = isset($range['end']) && trim((string) $range['end']) !== '';
+
+                    if (!$hasStart && !$hasEnd) {
+                        continue;
+                    }
+
+                    $startKey = "daterange{$i}_{$j}_start";
+                    $endKey = "daterange{$i}_{$j}_end";
+
+                    if ($hasStart && $hasEnd) {
+                        $params[$startKey] = trim($range['start']);
+                        $params[$endKey] = trim($range['end']);
+                        $rangeClauses[] = "DATE($col) BETWEEN :$startKey AND :$endKey";
+                    } elseif ($hasStart) {
+                        $params[$startKey] = trim($range['start']);
+                        $rangeClauses[] = "DATE($col) >= :$startKey";
+                    } else {
+                        $params[$endKey] = trim($range['end']);
+                        $rangeClauses[] = "DATE($col) <= :$endKey";
+                    }
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasMin = isset($range['min']) && $range['min'] !== '';
+                    $hasMax = isset($range['max']) && $range['max'] !== '';
+
+                    if (!$hasMin && !$hasMax) {
+                        continue;
+                    }
+
+                    $minKey = "range{$i}_{$j}_min";
+                    $maxKey = "range{$i}_{$j}_max";
+                    $params[$minKey] = $hasMin ? (float) $range['min'] : 0.0;
+                    $params[$maxKey] = $hasMax ? (float) $range['max'] : (float) $this->max;
+                    $rangeClauses[] = "$col BETWEEN :$minKey AND :$maxKey";
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value)) {
+                $selectedValues = array_values(array_filter(
+                    $value,
+                    fn ($v) => trim((string) $v) !== ""
+                ));
+
+                if (empty($selectedValues)) {
+                    continue;
+                }
+
+                $placeholders = [];
+                foreach ($selectedValues as $j => $selectedValue) {
+                    $paramKey = "filter{$i}_{$j}";
+                    $placeholders[] = ":$paramKey";
+                    $params[$paramKey] = trim($selectedValue);
+                }
+
+                $filterColumn[] = "$col IN (" . implode(", ", $placeholders) . ")";
             } else {
                 $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . $item['value'] . "%";
+                $params["search$i"] = "%" . $value . "%";
             }
         }
         try {
@@ -303,16 +399,112 @@ class SuppliersPurchaseOrder
                 continue;
             }
             $col = $columnAliasMap[$item['id']] ?? $item['id'];
-            if (is_array($item['value'])) {
-                $params["min$i"] = (float) $item['value']['min'];
+            $value = $item['value'];
+            if (is_array($value) && array_key_exists('start', $value)) {
+                $hasStart = trim((string) $value['start']) !== '';
+                $hasEnd = trim((string) $value['end']) !== '';
+                if (!$hasStart && !$hasEnd) {
+                    continue;
+                }
+                if ($hasStart && $hasEnd) {
+                    $params["start$i"] = trim($value['start']);
+                    $params["end$i"] = trim($value['end']);
+                    $filterColumn[] = "DATE($col) BETWEEN :start$i AND :end$i";
+                } elseif ($hasStart) {
+                    $params["start$i"] = trim($value['start']);
+                    $filterColumn[] = "DATE($col) >= :start$i";
+                } else {
+                    $params["end$i"] = trim($value['end']);
+                    $filterColumn[] = "DATE($col) <= :end$i";
+                }
+            } elseif (is_array($value) && array_key_exists('min', $value)) {
+                $params["min$i"] = (float) $value['min'];
                 $filterColumn[] = "$col BETWEEN :min$i AND :max$i";
 
-                $params["max$i"] = $item['value']['max'] === ""
+                $params["max$i"] = $value['max'] === ""
                     ? (float) $this->max
-                    : (float) $item['value']['max'];
+                    : (float) $value['max'];
+            } elseif (
+                is_array($value)
+                && isset($value[0])
+                && is_array($value[0])
+                && array_key_exists('start', $value[0])
+            ) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasStart = isset($range['start']) && trim((string) $range['start']) !== '';
+                    $hasEnd = isset($range['end']) && trim((string) $range['end']) !== '';
+
+                    if (!$hasStart && !$hasEnd) {
+                        continue;
+                    }
+
+                    $startKey = "daterange{$i}_{$j}_start";
+                    $endKey = "daterange{$i}_{$j}_end";
+
+                    if ($hasStart && $hasEnd) {
+                        $params[$startKey] = trim($range['start']);
+                        $params[$endKey] = trim($range['end']);
+                        $rangeClauses[] = "DATE($col) BETWEEN :$startKey AND :$endKey";
+                    } elseif ($hasStart) {
+                        $params[$startKey] = trim($range['start']);
+                        $rangeClauses[] = "DATE($col) >= :$startKey";
+                    } else {
+                        $params[$endKey] = trim($range['end']);
+                        $rangeClauses[] = "DATE($col) <= :$endKey";
+                    }
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value) && isset($value[0]) && is_array($value[0])) {
+                $rangeClauses = [];
+
+                foreach ($value as $j => $range) {
+                    $hasMin = isset($range['min']) && $range['min'] !== '';
+                    $hasMax = isset($range['max']) && $range['max'] !== '';
+
+                    if (!$hasMin && !$hasMax) {
+                        continue;
+                    }
+
+                    $minKey = "range{$i}_{$j}_min";
+                    $maxKey = "range{$i}_{$j}_max";
+                    $params[$minKey] = $hasMin ? (float) $range['min'] : 0.0;
+                    $params[$maxKey] = $hasMax ? (float) $range['max'] : (float) $this->max;
+                    $rangeClauses[] = "$col BETWEEN :$minKey AND :$maxKey";
+                }
+
+                if (empty($rangeClauses)) {
+                    continue;
+                }
+
+                $filterColumn[] = "(" . implode(" OR ", $rangeClauses) . ")";
+            } elseif (is_array($value)) {
+                $selectedValues = array_values(array_filter(
+                    $value,
+                    fn ($v) => trim((string) $v) !== ""
+                ));
+
+                if (empty($selectedValues)) {
+                    continue;
+                }
+
+                $placeholders = [];
+                foreach ($selectedValues as $j => $selectedValue) {
+                    $paramKey = "filter{$i}_{$j}";
+                    $placeholders[] = ":$paramKey";
+                    $params[$paramKey] = trim($selectedValue);
+                }
+
+                $filterColumn[] = "$col IN (" . implode(", ", $placeholders) . ")";
             } else {
                 $filterColumn[] = "$col LIKE :search$i";
-                $params["search$i"] = "%" . trim($item['value']) . "%";
+                $params["search$i"] = "%" . trim($value) . "%";
             }
         }
         try {

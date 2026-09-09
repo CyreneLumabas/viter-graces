@@ -240,10 +240,14 @@ function allowedColumns()
         "sales_order_balance_per_product",
         "purchase_order_total_balance_per_product",
         "purchase_order_total_paid_per_product",
-        // NOTE: "payment_status" (aliased from purchase_order_payment_status)
-        // and "amount"/"total_amount_per_product" (aliased from
+        // "payment_status" is aliased from purchase_order_payment_status in
+        // every ReportSalesOrder.php AR/AP/Expenses method that selects it -
+        // mapped back to the real column via $columnAliasMap in
+        // buildFilterColumns() before it reaches the WHERE clause
+        "payment_status",
+        // NOTE: "amount"/"total_amount_per_product" (aliased from
         // purchase_order_total_amount_per_product / a computed sum) are
-        // SELECT-only aliases in ReportSalesOrder.php's AR/AP/Expenses
+        // still SELECT-only aliases in ReportSalesOrder.php's AR/AP/Expenses
         // methods - referencing them in a WHERE clause errors or is a
         // no-op, so they're deliberately left out of this list
         // Overdue Payments - date/amount filters

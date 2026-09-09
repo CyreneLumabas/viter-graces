@@ -22,6 +22,20 @@ function checkReadAllActive($object, $allowedColumns = [])
     checkQuery($query, "Empty records. (read all active )");
     return $query;
 }
+// Read all
+function checkReadAllSku($object, $allowedColumns = [])
+{
+    $query = $object->readAllSku($allowedColumns);
+    checkQuery($query, "Empty records. (read all sku)");
+    return $query;
+}
+// Read all
+function checkReadAllUnit($object, $allowedColumns = [])
+{
+    $query = $object->readAllUnit($allowedColumns);
+    checkQuery($query, "Empty records. (read all unit)");
+    return $query;
+}
 
 // Read all
 function checkReadAllActiveByName($object)

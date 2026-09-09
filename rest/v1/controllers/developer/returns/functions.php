@@ -41,6 +41,13 @@ function allowedColumns()
 {
     $query = [
         "return_product_status",
+        // aliased as "is_status" and "resolution_type" in Returns.php's
+        // readAll()/readLimit() SELECT - both frontend-facing alias ids are
+        // listed here too since the filter id sent by the UI is the alias,
+        // not the real column; Returns.php's buildFilterColumns() maps them
+        // back to the real column via $columnAliasMap before the WHERE
+        "is_status",
+        "resolution_type",
         "return_product_number",
         "return_product_order_id",
         "return_product_order_number",

@@ -90,8 +90,10 @@ RewriteRule ^products/read-all-active-by-product$ controllers/developer/products
 RewriteRule ^products/read-all-product-that-have-stock$ controllers/developer/products/read-all-product-that-have-stock.php [L]
 RewriteRule ^products/read-all-category$ controllers/developer/products/read-all-category.php [L]
 RewriteRule ^products/read-all-by-active$ controllers/developer/products/read-all-by-active.php [L]
+RewriteRule ^products/read-all-by-sku$ controllers/developer/products/read-all-by-sku.php [L]
+RewriteRule ^products/read-all-by-unit$ controllers/developer/products/read-all-by-unit.php [L]
 
-### ACTIVITY LOG ###
+### ACTIVITY LOG ### 
 RewriteRule ^activity/read-with-limit$ controllers/developer/activity-log/read-with-limit.php [L]
 RewriteRule ^activity-log/page-all-activity-log/page/([0-9]+)$ controllers/developer/activity-log/page.php?start=$1 [L]
 
@@ -109,6 +111,7 @@ RewriteRule ^stock-movement/([0-9]+)$ controllers/developer/inventory/stock-move
 RewriteRule ^stock-movement/active/([0-9]+)$ controllers/developer/inventory/stock-movement/active.php?id=$1 [L] 
 RewriteRule ^stock-movement/page/([0-9]+)$ controllers/developer/inventory/stock-movement/page.php?start=$1 [L]
 RewriteRule ^stock-movement/search$ controllers/developer/inventory/stock-movement/search.php [L]
+RewriteRule ^stock-movement/read-all-by-location$ controllers/developer/inventory/stock-movement/read-all-by-location.php [L]
 RewriteRule ^stock-movement/read-all-low-stock$ controllers/developer/inventory/stock-overview/read-all-low-stock.php [L]
 RewriteRule ^stock-movement/read-count-low-stock$ controllers/developer/inventory/stock-overview/read-count-low-stock.php [L]
 

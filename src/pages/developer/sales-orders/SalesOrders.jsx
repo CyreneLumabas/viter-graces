@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { apiVersion } from "@/config/config";
 import {
   ActionTableList,
@@ -17,6 +14,10 @@ import { StoreContext } from "@/store/StoreContext";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
 import React from "react";
 import ModalSalesOrders from "./ModalSalesOrders";
+import {
+  MultiRangeAmountFilter,
+  MultiRangeDateFilter,
+} from "@/components/inputs/InputRangeFilter";
 import ViewSalesDetails from "./ViewSalesDetails";
 
 const SalesOrders = () => {
@@ -31,12 +32,15 @@ const SalesOrders = () => {
       header: "status",
       classTh: "min-w-[7rem]",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("payment-status")}
+            staticOptions={ActiveInActiveStatus("payment-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -52,28 +56,44 @@ const SalesOrders = () => {
     {
       accessorKey: "sales_order_date",
       header: "date",
-      classTh: "min-w-[7rem]",
+      classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "date",
-      meta: "",
-      defaultValue: store.credentials?.data?.server_date,
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter
+            column={column}
+            testFilterId={"filter-order-date"}
+            singleSidedExact
+          />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_due_date",
       header: "Due Date",
-      classTh: "min-w-[7rem]",
+      classTh: "min-w-[10rem]",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter
+            column={column}
+            testFilterId={"filter-due-date"}
+            singleSidedExact
+          />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_customer_name",
       header: "Customers",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -85,40 +105,53 @@ const SalesOrders = () => {
       accessorKey: "sales_order_total_receivable_amount",
       header: "total",
       amount: true,
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-total"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_paid_amount",
       header: "paid",
       paid_amount: true,
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-paid"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_total_balance_amount",
       header: "balance",
       amount: true,
-      filterFn: "between",
+      filterFn: "multiRange",
       classTh: "min-w-[10rem]",
       classTd: "",
-      meta: "",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-balance"} />
+        ),
+      },
     },
     {
       accessorKey: "sales_order_payment_method",
       header: "method",
       classTh: "min-w-[10rem]",
       classTd: "capitalize ",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={PaymentMethodList()}
+            staticOptions={PaymentMethodList().map((option) => option.value)}
+            testFilterId={"filter-method"}
           />
         ),
       },
@@ -129,12 +162,13 @@ const SalesOrders = () => {
       header: "payment terms",
       classTh: "min-w-[10rem]",
       classTd: "capitalize ",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={PaymentTermsList()}
+            staticOptions={PaymentTermsList().map((option) => option.value)}
+            testFilterId={"filter-payment-terms"}
           />
         ),
       },
@@ -145,10 +179,10 @@ const SalesOrders = () => {
       header: "Created by",
       classTh: "min-w-[10rem]",
       classTd: "capitalize ",
-      filterFn: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-received-by"
             testFilterId={"filter-owner"}

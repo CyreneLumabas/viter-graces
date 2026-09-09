@@ -1,9 +1,13 @@
-import { SearchableSelectFilter } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ReportsStats from "../ReportsStats";
+import {
+  MultiRangeAmountFilter,
+  MultiRangeDateFilter,
+} from "@/components/inputs/InputRangeFilter";
 
 const OverduePayments = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -30,17 +34,22 @@ const OverduePayments = () => {
       header: "Date",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-due-date"} />
+        ),
+      },
     },
     {
       accessorKey: "installment_payment_customer_name",
       header: "Customers",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -54,8 +63,12 @@ const OverduePayments = () => {
       header: "Amount",
       classTh: "min-w-20",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+        ),
+      },
     },
   ];
 

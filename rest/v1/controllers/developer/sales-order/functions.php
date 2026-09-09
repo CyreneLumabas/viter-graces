@@ -123,6 +123,7 @@ function allowedColumns()
         "sales_order_customer_id",
         "sales_order_customer_name",
         "sales_order_payment_method",
+        "sales_order_payment_terms",
         "sales_order_product_id",
         "sales_order_product_name",
         "sales_order_qty",

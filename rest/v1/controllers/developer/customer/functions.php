@@ -12,6 +12,10 @@ function allowedColumns()
 {
     $query = [
         "customer_is_active",
+        // aliased as "is_active" in Customer.php's readAll()/readLimit() -
+        // mapped back to customer_is_active via the $columnAliasMap passed
+        // into buildFilterColumns() from those two methods specifically
+        "is_active",
         "customer_name",
         "customer_email",
         "customer_phone",

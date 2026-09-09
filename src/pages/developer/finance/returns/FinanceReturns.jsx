@@ -1,12 +1,10 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import { ActiveInActiveStatus, RefundMethodList } from "@/layout/ArrayValue";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const FinanceReturns = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -18,12 +16,15 @@ const FinanceReturns = () => {
       header: "status",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("return-status")}
+            staticOptions={ActiveInActiveStatus("return-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -34,9 +35,10 @@ const FinanceReturns = () => {
       header: "Customers",
       classTh: "min-w-[10rem] ",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="customer/read-all-by-active"
             testFilterId={"filter-customer"}
@@ -49,13 +51,15 @@ const FinanceReturns = () => {
       header: "Resolution",
       classTh: "min-w-40",
       classTd: "capitalize",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("resolution-type")}
-            uppercase="capitalize! "
+            staticOptions={ActiveInActiveStatus("resolution-type").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-resolution-type"}
           />
         ),
       },
@@ -67,12 +71,13 @@ const FinanceReturns = () => {
       classTd: "capitalize ",
       // meta: "",
       // cell: (info) => info.getValue() || "—",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={RefundMethodList()}
-            uppercase="capitalize! "
+            staticOptions={RefundMethodList().map((option) => option.value)}
+            testFilterId={"filter-refund-method"}
           />
         ),
       },
@@ -83,8 +88,15 @@ const FinanceReturns = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-total-amount"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "return_product_paid_amount",
@@ -92,17 +104,25 @@ const FinanceReturns = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-returned-amount"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "return_product_owner_name",
       header: "Product Owner",
       classTh: "min-w-[10rem]",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="product-owner/read-by-product-owner"
             testFilterId={"filter-owner"}

@@ -1,4 +1,4 @@
-import { SearchableSelectFilterStatus } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActiveInActiveStatus, ActionTableList } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -15,12 +15,13 @@ const Roles = () => {
       header: "status",
       classTh: "w-[10rem]! p-0!",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus()}
+            staticOptions={ActiveInActiveStatus()}
+            testFilterId={"filter-status"}
           />
         ),
       },

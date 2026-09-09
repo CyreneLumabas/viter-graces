@@ -3,7 +3,9 @@ import useQueryData from "@/services/useQueryData";
 import { StoreContext } from "@/store/StoreContext";
 import { isEmptyItem } from "@/utilities/isEmptyItem";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
+import { handleEscape } from "@/utilities/handleEscape";
 import { useField } from "formik";
+import { Check, ChevronDown } from "lucide-react";
 import React, { useMemo } from "react";
 import Select from "react-select";
 
@@ -423,6 +425,188 @@ export const SearchableSelectFilter = ({ column, path, testFilterId }) => {
          ${!isSelected && isFocused ? "bg-primary! text-secondary! " : " "}`,
         }}
       />
+    </div>
+  );
+};
+
+// Reusable checkbox dropdown filter - lets a user select multiple values for
+// a single column filter (OR'd together server-side). Drop-in alternative to
+// SearchableSelectFilter for columns/tables that need multi-select instead of
+// single-select. column.getFilterValue() is the source of truth: an array of
+// the currently-applied values (or undefined when nothing is applied).
+//
+// Pass either `path` (fetches option names from an API endpoint, e.g.
+// suppliers/customers) or `staticOptions` (options already known
+// client-side, e.g. status/payment method/payment terms enums) - not both.
+// `staticOptions` entries can be plain strings (label doubles as the filter
+// value) or `{ label, value }` pairs when the filter value isn't the same
+// as the text shown in the checkbox (e.g. an is_active toggle where the
+// column stores 1/0 but the checkbox should read "Active"/"Inactive").
+export const MultiSelectCheckboxFilter = ({
+  column,
+  path,
+  staticOptions,
+  testFilterId,
+  placeholder = "--",
+}) => {
+  const { data: result } = useQueryData(
+    staticOptions ? null : `${apiVersion}/${path}`, // endpoint
+    "get", // method
+    `${path}`, // key
+  );
+
+  const options = useMemo(
+    () => staticOptions || result?.data?.map((item) => item.name) || [],
+    [result, staticOptions],
+  );
+
+  const normalizedOptions = useMemo(
+    () =>
+      options.map((option) =>
+        option && typeof option === "object"
+          ? option
+          : { label: String(option), value: option },
+      ),
+    [options],
+  );
+
+  const appliedValue = column.getFilterValue() || [];
+
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [draft, setDraft] = React.useState(appliedValue);
+  const [search, setSearch] = React.useState("");
+  const wrapperRef = React.useRef(null);
+
+  const handleClose = () => setIsOpen(false);
+  handleEscape(handleClose);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        handleClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const openDropdown = () => {
+    setDraft(appliedValue);
+    setSearch("");
+    setIsOpen(true);
+  };
+
+  const toggleValue = (value) => {
+    setDraft((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value],
+    );
+  };
+
+  const applyFilter = () => {
+    column.setFilterValue(draft.length ? draft : undefined);
+    setIsOpen(false);
+  };
+
+  const clearFilter = () => {
+    setDraft([]);
+    column.setFilterValue(undefined);
+    setIsOpen(false);
+  };
+
+  const visibleOptions = normalizedOptions.filter((option) =>
+    option.label.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const triggerLabel =
+    appliedValue.length === 0
+      ? placeholder
+      : appliedValue.length === 1
+        ? (normalizedOptions.find((option) => option.value === appliedValue[0])
+            ?.label ?? appliedValue[0])
+        : `${appliedValue.length} selected`;
+
+  return (
+    <div className="relative" ref={wrapperRef} data-testid={testFilterId}>
+      <button
+        type="button"
+        onClick={() => (isOpen ? handleClose() : openDropdown())}
+        className={`flex items-center justify-between gap-1 w-full min-h-full text-sm border rounded-lg px-2 py-1.5 cursor-pointer shadow-none dark:bg-[#0b111e] normal-case
+        ${isOpen ? "border-primary" : "border-gray-300"}
+        hover:border-primary`}
+      >
+        <span
+          className={`truncate ${appliedValue.length ? "text-gray-700 dark:text-white" : "text-gray-400"}`}
+        >
+          {triggerLabel}
+        </span>
+        <ChevronDown className="w-3.5 h-3.5 shrink-0 text-gray-500" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-56 max-w-[80vw] border border-gray-100 rounded-lg shadow-lg bg-white dark:bg-[#0b111e]">
+          <div className="sticky top-0 z-10 p-2 border-b border-gray-100 bg-white dark:bg-[#0b111e]">
+            <input
+              type="search"
+              autoFocus
+              value={search}
+              placeholder="Search..."
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full! m-0! text-sm border-gray-300 rounded-md"
+              data-testid={`${testFilterId}-search`}
+            />
+          </div>
+
+          <ul className="max-h-60 overflow-auto py-1">
+            {visibleOptions.length === 0 && (
+              <li className="px-3 py-2 text-sm text-gray-400">No options</li>
+            )}
+            {visibleOptions.map((option, key) => {
+              const checked = draft.includes(option.value);
+              return (
+                <li key={key}>
+                  <label
+                    className={`flex items-center gap-2 px-3 py-2 text-sm normal-case cursor-pointer hover:bg-primary/10 ${checked ? "bg-primary/5" : ""}`}
+                  >
+                    <span
+                      className={`flex items-center justify-center w-4 h-4 shrink-0 rounded-sm border ${checked ? "bg-primary border-primary" : "border-gray-300"}`}
+                    >
+                      {checked && <Check className="w-3 h-3 text-white" />}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={checked}
+                      onChange={() => toggleValue(option.value)}
+                    />
+                    <span className="truncate text-gray-700 dark:text-white">
+                      {option.label}
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="flex items-center gap-2 p-2 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={applyFilter}
+              className="btn-modal-submit flex-1 py-1! text-sm"
+            >
+              Filter
+            </button>
+            <button
+              type="button"
+              onClick={clearFilter}
+              className="btn-modal-cancel flex-1 py-1! text-sm"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

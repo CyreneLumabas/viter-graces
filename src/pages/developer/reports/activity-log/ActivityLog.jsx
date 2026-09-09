@@ -4,6 +4,7 @@ import { setIsView } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ActivityLogDetailsModal from "./ActivityLogDetailsModal";
+import { MultiRangeDateFilter } from "@/components/inputs/InputRangeFilter";
 
 // pill color per activity action word
 export const activityActionPillClass = (action = "") => {
@@ -88,8 +89,12 @@ const ActivityLog = () => {
     {
       accessorKey: "activity_log_created",
       header: "date & time",
-      filterFn: "date",
-      meta: "",
+      filterFn: "multiDateRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeDateFilter column={column} testFilterId={"filter-activity-date"} />
+        ),
+      },
       classTh: "min-w-[10rem]",
       classTd: "",
     },

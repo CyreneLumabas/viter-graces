@@ -31,8 +31,11 @@ function allowedColumns()
         "sales_order_payment_method",
         "sales_order_paid_per_product",
         "sales_order_total_balance_amount",
-        // "status_text" and "days_overdue" are computed CASE-expression
-        // aliases and can't be referenced in a WHERE clause
+        // status_text is a computed CASE-expression alias - mapped back to
+        // the identical CASE expression via $columnAliasMap in
+        // AccountReceivable.php's buildFilterColumns() before it reaches
+        // the WHERE clause. days_overdue has no filter UI and is left out.
+        "status_text",
         "name",
         "id",
         "order_date",

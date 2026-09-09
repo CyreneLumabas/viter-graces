@@ -1,7 +1,4 @@
-import {
-  SearchableSelectFilter,
-  SearchableSelectFilterStatus,
-} from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import { ActiveInActiveStatus } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
 import InfiniteTable from "@/layout/table/InfiniteTable";
@@ -9,6 +6,7 @@ import { StoreContext } from "@/store/StoreContext";
 import { ProductOwnerId } from "@/utilities/productOwnerToken";
 import React from "react";
 import ReportsStats from "../ReportsStats";
+import { MultiRangeAmountFilter } from "@/components/inputs/InputRangeFilter";
 
 const InventoryMovement = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -20,12 +18,15 @@ const InventoryMovement = () => {
       header: "status",
       classTh: "w-[10rem]",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus("stock-type-status")}
+            staticOptions={ActiveInActiveStatus("stock-type-status").map(
+              (option) => option.value,
+            )}
+            testFilterId={"filter-status"}
           />
         ),
       },
@@ -35,9 +36,10 @@ const InventoryMovement = () => {
       header: "Products",
       classTh: "min-w-40",
       classTd: "",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilter
+          <MultiSelectCheckboxFilter
             column={column}
             path="products/read-all-by-active"
             testFilterId={"filter-product-name"}
@@ -64,16 +66,27 @@ const InventoryMovement = () => {
       header: "Stock Quantity",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-stock-qty"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "products_low_stock_threshold",
       header: "Threshold",
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-threshold"} />
+        ),
+      },
     },
     {
       accessorKey: "products_price",
@@ -81,8 +94,12 @@ const InventoryMovement = () => {
       amount: true,
       classTh: "min-w-40",
       classTd: "",
-      filterFn: "between",
-      meta: "",
+      filterFn: "multiRange",
+      meta: {
+        filterComponent: (column) => (
+          <MultiRangeAmountFilter column={column} testFilterId={"filter-price"} />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_location",
@@ -99,9 +116,10 @@ const InventoryMovement = () => {
             header: "Product Owner",
             classTh: "min-w-[10rem]",
             classTd: "",
+            filterFn: "multiSelect",
             meta: {
               filterComponent: (column) => (
-                <SearchableSelectFilter
+                <MultiSelectCheckboxFilter
                   column={column}
                   path="product-owner/read-by-product-owner"
                   testFilterId={"filter-owner"}

@@ -5,7 +5,7 @@ import { StoreContext } from "@/store/StoreContext";
 import React from "react";
 import ModalProductOwner from "./modal/ModalProductOwner";
 import ViewProducts from "./modal/ViewProducts";
-import { SearchableSelectFilterStatus } from "@/components/inputs/InputSelect";
+import { MultiSelectCheckboxFilter } from "@/components/inputs/InputSelect";
 import WarningBanner from "@/layout/WarningBanner";
 const ProductOwner = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -17,13 +17,13 @@ const ProductOwner = () => {
       header: "status",
       classTh: "min-w-[5rem]!",
       classTd: "",
-      filterFn: "equals",
+      filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
-          <SearchableSelectFilterStatus
+          <MultiSelectCheckboxFilter
             column={column}
-            options={ActiveInActiveStatus()}
-            testFilterStatusId={"filter-status"}
+            staticOptions={ActiveInActiveStatus()}
+            testFilterId={"filter-status"}
           />
         ),
       },
