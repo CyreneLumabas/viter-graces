@@ -52,6 +52,7 @@ class AccountReceivable
     public $installment_payment_amount;
     public $installment_payment_customer_id;
     public $installment_payment_customer_name;
+    public $installment_payment_created;
     public $installment_payment_updated;
 
     public $stock_movement_before_qty;
@@ -390,6 +391,67 @@ class AccountReceivable
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "sales_order_number" => $this->installment_payment_code_number,
+            ]);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+        return $query;
+    }
+
+    // create
+    // Records a brand-new, already-paid installment row for a Customize-type
+    // order (date + amount + method entered directly in Accounts Receivable) -
+    // the counterpart to SalesOrder::createInstallment() for the
+    // auto-generated monthly/weekly schedule.
+    public function createInstallmentPayment()
+    {
+        try {
+            $sql = "insert into {$this->tblinstallmentPayment} ";
+            $sql .= "( installment_payment_code_id, ";
+            $sql .= "installment_payment_code, ";
+            $sql .= "installment_payment_is_paid, ";
+            $sql .= "installment_payment_due_date, ";
+            $sql .= "installment_payment_code_number, ";
+            $sql .= "installment_payment_amount, ";
+            $sql .= "installment_payment_method, ";
+            $sql .= "installment_payment_customer_id, ";
+            $sql .= "installment_payment_customer_name, ";
+            $sql .= "installment_payment_paid_amount, ";
+            $sql .= "installment_payment_received_id, ";
+            $sql .= "installment_payment_received_name, ";
+            $sql .= "installment_payment_created, ";
+            $sql .= "installment_payment_updated ) values ( ";
+            $sql .= ":installment_payment_code_id, ";
+            $sql .= ":installment_payment_code, ";
+            $sql .= ":installment_payment_is_paid, ";
+            $sql .= ":installment_payment_due_date, ";
+            $sql .= ":installment_payment_code_number, ";
+            $sql .= ":installment_payment_amount, ";
+            $sql .= ":installment_payment_method, ";
+            $sql .= ":installment_payment_customer_id, ";
+            $sql .= ":installment_payment_customer_name, ";
+            $sql .= ":installment_payment_paid_amount, ";
+            $sql .= ":installment_payment_received_id, ";
+            $sql .= ":installment_payment_received_name, ";
+            $sql .= ":installment_payment_created, ";
+            $sql .= ":installment_payment_updated ) ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "installment_payment_code_id" => $this->installment_payment_code_id,
+                "installment_payment_code" => $this->installment_payment_code,
+                "installment_payment_is_paid" => $this->installment_payment_is_paid,
+                "installment_payment_due_date" => $this->installment_payment_due_date,
+                "installment_payment_code_number" => $this->installment_payment_code_number,
+                "installment_payment_amount" => $this->installment_payment_amount,
+                "installment_payment_method" => $this->installment_payment_method,
+                "installment_payment_customer_id" => $this->installment_payment_customer_id,
+                "installment_payment_customer_name" => $this->installment_payment_customer_name,
+                "installment_payment_paid_amount" => $this->installment_payment_paid_amount,
+                "installment_payment_received_id" => $this->installment_payment_received_id,
+                "installment_payment_received_name" => $this->installment_payment_received_name,
+                "installment_payment_created" => $this->installment_payment_created,
+                "installment_payment_updated" => $this->installment_payment_updated,
             ]);
         } catch (PDOException $ex) {
             logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);

@@ -8,6 +8,7 @@ import {
   MultiRangeAmountFilter,
   MultiRangeDateFilter,
 } from "@/components/inputs/InputRangeFilter";
+import { isEmptyItem } from "@/utilities/isEmptyItem";
 
 const OverduePayments = () => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -35,6 +36,9 @@ const OverduePayments = () => {
       classTh: "min-w-40",
       classTd: "",
       filterFn: "multiDateRange",
+      // Customize-type installments have no fixed schedule, so this can be
+      // null/empty - show "--" instead of a blank cell.
+      cell: (info) => isEmptyItem(info.getValue(), "--"),
       meta: {
         filterComponent: (column) => (
           <MultiRangeDateFilter column={column} testFilterId={"filter-due-date"} />

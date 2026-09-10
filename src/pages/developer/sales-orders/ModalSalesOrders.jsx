@@ -923,34 +923,47 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                               }}
                             />
                           </div>
-                          <div className="relative">
-                            <InputSelectArrayWithOptions
-                              label={`Payment every`}
-                              type="text"
-                              name="sales_order_installment_type_day"
-                              options={InstallmentByType(
-                                props.values.sales_order_installment_type,
-                              )}
-                              onChange={(e) => {
-                                props.setFieldValue(
-                                  "sales_order_installment_type_day",
-                                  e.target.options[e.target.selectedIndex].text,
-                                );
-                                return e;
-                              }}
-                            />
-                          </div>
+                          {props.values.sales_order_installment_type?.toLocaleLowerCase() !==
+                          "customize" ? (
+                            <>
+                              <div className="relative">
+                                <InputSelectArrayWithOptions
+                                  label={`Payment every`}
+                                  type="text"
+                                  name="sales_order_installment_type_day"
+                                  options={InstallmentByType(
+                                    props.values.sales_order_installment_type,
+                                  )}
+                                  onChange={(e) => {
+                                    props.setFieldValue(
+                                      "sales_order_installment_type_day",
+                                      e.target.options[e.target.selectedIndex]
+                                        .text,
+                                    );
+                                    return e;
+                                  }}
+                                />
+                              </div>
+                              <div className="relative ">
+                                <InputText
+                                  label="Installment count"
+                                  type="number"
+                                  name="sales_order_installment_count"
+                                  disabled={mutation.isPending}
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            ""
+                          )}
                           <div className="relative ">
                             <InputText
-                              label="Installment count"
-                              type="number"
-                              name="sales_order_installment_count"
-                              disabled={mutation.isPending}
-                            />
-                          </div>
-                          <div className="relative ">
-                            <InputText
-                              label="Installment Amount"
+                              label={
+                                props.values.sales_order_installment_type?.toLocaleLowerCase() ===
+                                "customize"
+                                  ? "Total Balance"
+                                  : "Installment Amount"
+                              }
                               type="number"
                               name="sales_order_installment_amount"
                               readOnly
@@ -959,6 +972,16 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                             />
                           </div>
                         </div>
+                        {props.values.sales_order_installment_type?.toLocaleLowerCase() ===
+                        "customize" ? (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Individual installment payments for a customized
+                            plan are recorded from Finance Accounts Receivable
+                            once this order is created.
+                          </p>
+                        ) : (
+                          ""
+                        )}
                       </div>
                     </>
                   ) : itemEdit &&

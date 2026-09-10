@@ -422,7 +422,13 @@ function installmentDetails($val, $installmentItems, $data)
     $val->installment_payment_method = "";
 
     if (strtolower($val->sales_order_payment_terms) == "installment") {
-        if ((float)$data['sales_order_installment_count'] > 0) {
+        // Customize: no fixed schedule to generate here - individual
+        // payments (date + amount + method) are added later from Finance >
+        // Accounts Receivable, so no installment row is created up front.
+        if (
+            strtolower($data['sales_order_installment_type']) != "customize"
+            && (float)$data['sales_order_installment_count'] > 0
+        ) {
             // CREATE INSTALLMENT PAYMENT
             for ($a = 0; $a < (float)$data['sales_order_installment_count']; $a++) {
                 // 

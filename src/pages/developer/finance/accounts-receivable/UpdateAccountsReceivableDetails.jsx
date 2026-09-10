@@ -86,6 +86,153 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     },
   });
 
+  // Customize-type orders have no auto-generated schedule - individual
+  // installment payments (date + paid amount + method) are added here one
+  // row at a time instead.
+  const isCustomizeInstallment =
+    itemEdit?.sales_order_installment_type?.toLowerCase() === "customize";
+
+  const [newInstallments, setNewInstallments] = React.useState([]);
+
+  const handleAddNewInstallment = () => {
+    setNewInstallments([
+      ...newInstallments,
+      {
+        installment_payment_due_date: "",
+        installment_payment_paid_amount: "",
+        installment_payment_method: "cash",
+      },
+    ]);
+  };
+
+  const handleChangeNewInstallment = (index, field, value) => {
+    const updated = [...newInstallments];
+    updated[index] = { ...updated[index], [field]: value };
+    setNewInstallments(updated);
+  };
+
+  const handleRemoveNewInstallment = (index) => {
+    setNewInstallments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const createMutation = useMutation({
+    mutationFn: (values) =>
+      queryData(
+        `${apiVersion}/finance-account-receivable/account-receivable`,
+        "post",
+        values,
+      ),
+    onSuccess: (res, variables) => {
+      if (res?.success) {
+        dispatch(setSuccess(true));
+        dispatch(setMessage("Installment payment added."));
+
+        // Patch in the real database id now that it exists - the row is
+        // already locked/rendered (see handleSaveNewInstallment's optimistic
+        // update below), this just keeps its record accurate.
+        setItems((prev) =>
+          (prev || []).map((item) =>
+            item === variables.__item
+              ? { ...item, installment_payment_aid: res?.["Account Receivable ID"] }
+              : item,
+          ),
+        );
+
+        if (Number(variables.totalBalanceAmount) <= 0) {
+          queryClient.invalidateQueries({
+            queryKey: ["finance-account-receivable"],
+          });
+          dispatch(setIsAdd(false));
+        }
+      } else {
+        dispatch(setError(true));
+        dispatch(setMessage(res?.error));
+        rollbackNewInstallment(variables);
+      }
+    },
+    onError: (error, variables) => {
+      dispatch(setError(true));
+      dispatch(setMessage(error?.message || "Failed to save installment payment."));
+      rollbackNewInstallment(variables);
+    },
+  });
+
+  // Undoes the optimistic update from handleSaveNewInstallment when the
+  // server call fails - puts the row back into the editable draft list and
+  // reverts the totals it had already been folded into.
+  const rollbackNewInstallment = (variables) => {
+    setItems((prev) => (prev || []).filter((item) => item !== variables.__item));
+    setNewInstallments((prev) => [...prev, variables.__row]);
+    setTotalPaidAmount(
+      (prev) => Number(prev) - Number(variables.installment_payment_paid_amount),
+    );
+    setTotalBalanceAmount(
+      (prev) => Number(prev) + Number(variables.installment_payment_paid_amount),
+    );
+  };
+
+  const handleSaveNewInstallment = (row) => {
+    const enteredAmount = Number(row.installment_payment_paid_amount || 0);
+    if (enteredAmount <= 0 || !row.installment_payment_due_date) return;
+
+    const newTotalPaidAmount = Number(totalPaidAmount) + enteredAmount;
+    const newTotalBalanceAmount = Math.max(
+      0,
+      Number(totalBalanceAmount) - enteredAmount,
+    );
+
+    // Optimistic: lock the row to plain text the instant "Paid" is clicked,
+    // same as handleSave does for a monthly installment row - the request
+    // below persists it, rollbackNewInstallment undoes this if it fails.
+    const paidItem = {
+      installment_payment_aid: 0,
+      installment_payment_is_paid: 1,
+      installment_payment_due_date: row.installment_payment_due_date,
+      installment_payment_amount: enteredAmount,
+      installment_payment_paid_amount: enteredAmount,
+      installment_payment_method: row.installment_payment_method,
+    };
+
+    setItems((prev) => [...(prev || []), paidItem]);
+    setNewInstallments((prev) => prev.filter((r) => r !== row));
+    setTotalPaidAmount(newTotalPaidAmount);
+    setTotalBalanceAmount(newTotalBalanceAmount);
+
+    const paymentFields = {
+      sales_order_number: itemEdit?.sales_order_number,
+      sales_order_customer_id: itemEdit?.sales_order_customer_id,
+      sales_order_customer_name: itemEdit?.sales_order_customer_name,
+      sales_order_payment_method: row.installment_payment_method,
+      sales_order_total_amount: itemEdit?.sales_order_total_amount,
+      sales_order_discount: itemEdit?.sales_order_discount,
+      sales_order_tax: itemEdit?.sales_order_tax,
+      installment_payment_due_date: row.installment_payment_due_date,
+      installment_payment_paid_amount: enteredAmount,
+      installment_payment_method: row.installment_payment_method,
+      installment_payment_new_amount: enteredAmount,
+      installment_payment_received_id:
+        store.credentials?.data?.user_account_aid,
+      installment_payment_received_name: store.credentials?.data?.name,
+      installmentItems: items,
+      totalPaidAmount: newTotalPaidAmount,
+      totalBalanceAmount: newTotalBalanceAmount,
+    };
+
+    let data = {
+      ...ActivityLogDetails(
+        "finance account receivable",
+        "create",
+        store,
+        paymentFields,
+      ),
+      ...paymentFields,
+      __row: row,
+      __item: paidItem,
+    };
+
+    createMutation.mutate(data);
+  };
+
   let totalAmount = isEmptyItem(
     itemEdit?.sales_order_total_receivable_amount,
     0,
@@ -131,7 +278,10 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     // Credit memo can never pay out more than the customer's available
     // balance, nor more than this row still owes.
     if (a?.installment_payment_method === "credit memo") {
-      const maxAllowed = Math.min(availableCreditMemo, getRowRemainingBalance(a));
+      const maxAllowed = Math.min(
+        availableCreditMemo,
+        getRowRemainingBalance(a),
+      );
       if (value !== "" && Number(value) > maxAllowed) {
         value = maxAllowed;
       }
@@ -186,6 +336,21 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
 
   let paidAmount = filterUnpaidAmount?.reduce(
     (sum, item) => Number(sum) + getEnteredAmount(item),
+    0,
+  );
+
+  // Customize mode never has a pre-generated schedule - a row with no due
+  // date is stale/legacy data, not a real payment to act on, so it's kept
+  // out of the table entirely rather than shown as a blank row.
+  const visibleItems = isCustomizeInstallment
+    ? items?.filter((a) => !!a?.installment_payment_due_date)
+    : items;
+
+  // Live total of whatever's currently typed into the new custom-installment
+  // rows (not yet saved), so Total Paid/Balance react on every keystroke -
+  // same idea as `paidAmount` above for the existing rows' entered amounts.
+  const newInstallmentsPaidTotal = newInstallments.reduce(
+    (sum, row) => sum + Number(row.installment_payment_paid_amount || 0),
     0,
   );
 
@@ -299,6 +464,22 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
           {itemEdit?.sales_order_payment_terms}
         </p>
       </div>
+
+      <div className="flex justify-between items-center mt-3 mb-1">
+        <label></label>
+        {isCustomizeInstallment ? (
+          <button
+            type="button"
+            className="cursor-pointer flex items-center justify-center text-dark gap-2 px-3 py-3 bg-transparent rounded-md border-gray-300 border min-w-20 hover:bg-primary transition-all duration-300 ease-in-out hover:text-light dark:text-light"
+            onClick={handleAddNewInstallment}
+          >
+            <span className="capitalize leading-0">+ Add Payment</span>
+          </button>
+        ) : (
+          ""
+        )}
+      </div>
+
       <div className="border shadow border-gray-300 rounded-lg dark:bg-gray-700 w-full  transition-all duration-300 ease-in-out ">
         <div className="relative overflow-auto w-full h-full min-h-80 dark:bg-gray-900! ">
           <table className="shadow-none! ">
@@ -306,9 +487,13 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
               <tr className="sm:table-row sticky top-0 uppercase dark:bg-[#0b111e] border-0! ">
                 <th className="w-px dark:bg-gray-900! bg-gray-100!">#</th>
                 <th className={`min-w-40  dark:bg-gray-900! bg-gray-100!`}>
-                  Due Date
+                  {isCustomizeInstallment ? "Date" : "Due Date"}
                 </th>
-                <th className={` dark:bg-gray-900! bg-gray-100!`}>Amount</th>
+                {!isCustomizeInstallment ? (
+                  <th className={` dark:bg-gray-900! bg-gray-100!`}>Amount</th>
+                ) : (
+                  ""
+                )}
                 <th
                   className={`min-w-30! dark:bg-gray-900! bg-gray-100! text-center`}
                 >
@@ -323,24 +508,32 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
               </tr>
             </thead>
             <tbody className="">
-              {items?.map((a, index) => {
+              {visibleItems?.map((a, visibleIndex) => {
+                // `visibleItems` is a filtered view - row handlers below
+                // mutate `items` by index, so resolve back to that array's
+                // real index rather than the filtered list's position.
+                const index = items.indexOf(a);
                 const isUnpaid = Number(a?.installment_payment_is_paid) === 0;
 
                 return (
                   <React.Fragment key={index}>
                     <tr className="border-0!">
                       <td className="text-center dark:bg-gray-900! last:opacity-100 last:group-hover:opacity-100 last:-right-3 last:z-10">
-                        {index + 1}.
+                        {visibleIndex + 1}.
                       </td>
                       <td className=" dark:bg-gray-900! ">
                         {a?.installment_payment_due_date}
                       </td>
-                      <td className=" dark:bg-gray-900! ">
-                        <AmountWithPesoSign
-                          classN="size-3"
-                          amount={a["installment_payment_amount"]}
-                        />
-                      </td>
+                      {!isCustomizeInstallment ? (
+                        <td className=" dark:bg-gray-900! ">
+                          <AmountWithPesoSign
+                            classN="size-3"
+                            amount={a["installment_payment_amount"]}
+                          />
+                        </td>
+                      ) : (
+                        ""
+                      )}
                       {isUnpaid ? (
                         <>
                           <td className=" dark:bg-gray-900! ">
@@ -405,10 +598,84 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                   </React.Fragment>
                 );
               })}
+
+              {newInstallments.map((row, index) => (
+                <tr key={`new-${index}`} className="border-0!">
+                  <td className="text-center dark:bg-gray-900!">
+                    {visibleItems?.length + index + 1}.
+                  </td>
+                  <td className="dark:bg-gray-900!">
+                    <input
+                      type="date"
+                      value={row.installment_payment_due_date}
+                      onChange={(e) =>
+                        handleChangeNewInstallment(
+                          index,
+                          "installment_payment_due_date",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="dark:bg-gray-900!">
+                    <input
+                      type="number"
+                      className="text-right!"
+                      placeholder="0"
+                      value={row.installment_payment_paid_amount}
+                      onChange={(e) =>
+                        handleChangeNewInstallment(
+                          index,
+                          "installment_payment_paid_amount",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="dark:bg-gray-900!">
+                    <select
+                      value={row.installment_payment_method}
+                      onChange={(e) =>
+                        handleChangeNewInstallment(
+                          index,
+                          "installment_payment_method",
+                          e.target.value,
+                        )
+                      }
+                      className="capitalize"
+                    >
+                      {paymentMethodOptions
+                        .filter((m) => m.value !== "credit memo")
+                        .map((m) => (
+                          <option key={m.value} value={m.value}>
+                            {m.label}
+                          </option>
+                        ))}
+                    </select>
+                  </td>
+                  <td className="flex items-center gap-1">
+                    <button
+                      className="text-white bg-gray-500 hover:bg-green-800 rounded-sm p-1 text-[10px]"
+                      type="button"
+                      onClick={() => handleSaveNewInstallment(row)}
+                    >
+                      Paid
+                    </button>
+                    <button
+                      type="button"
+                      className="text-red-500 text-xl"
+                      onClick={() => handleRemoveNewInstallment(index)}
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
       <ul className="grid grid-cols-2 my-3 [&>li]:border-b [&>li]:border-b-gray-200 gap-y-2 ">
         <li>Total Amount</li>
         <li className="text-right text-black font-bold">
@@ -418,7 +685,11 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
         <li className="text-right text-green-600 font-bold">
           <AmountWithPesoSign
             classN="size-3"
-            amount={Number(totalPaidAmount) + Number(paidAmount)}
+            amount={
+              Number(totalPaidAmount) +
+              Number(paidAmount) +
+              Number(newInstallmentsPaidTotal)
+            }
           />
         </li>
       </ul>
@@ -428,7 +699,11 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
         </span>
         <span className="font-bold text-lg text-right text-red-600 dark:text-light">
           <AmountWithPesoSign
-            amount={Number(totalBalanceAmount) - Number(paidAmount)}
+            amount={
+              Number(totalBalanceAmount) -
+              Number(paidAmount) -
+              Number(newInstallmentsPaidTotal)
+            }
           />
         </span>
       </div>
