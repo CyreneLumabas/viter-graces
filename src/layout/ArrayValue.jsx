@@ -359,6 +359,7 @@ export const PaymentMethodInArList = () => {
 
 export const InstallmentType = () => {
   const result = [
+    { label: "customize", value: "customize" },
     { label: "monthly", value: "monthly" },
     { label: "weekly", value: "weekly" },
   ];

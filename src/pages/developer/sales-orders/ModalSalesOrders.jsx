@@ -334,7 +334,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
     validationAmount: false,
     sales_order_installment_type: isEmptyItem(
       itemEdit?.sales_order_installment_type,
-      "monthly",
+      "customize",
     ),
     sales_order_installment_type_day: isEmptyItem(
       itemEdit?.sales_order_installment_type_day,

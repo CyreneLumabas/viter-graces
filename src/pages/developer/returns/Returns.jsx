@@ -54,7 +54,10 @@ const Returns = () => {
       filterFn: "multiDateRange",
       meta: {
         filterComponent: (column) => (
-          <MultiRangeDateFilter column={column} testFilterId={"filter-return-date"} />
+          <MultiRangeDateFilter
+            column={column}
+            testFilterId={"filter-return-date"}
+          />
         ),
       },
     },
@@ -142,7 +145,10 @@ const Returns = () => {
       filterFn: "multiRange",
       meta: {
         filterComponent: (column) => (
-          <MultiRangeAmountFilter column={column} testFilterId={"filter-amount"} />
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-amount"}
+          />
         ),
       },
     },
