@@ -357,9 +357,10 @@ export const PaymentMethodInArList = () => {
   return result;
 };
 
+/** @typedef {'flexible' | 'monthly' | 'weekly'} InstallmentTypeValue */
 export const InstallmentType = () => {
   const result = [
-    { label: "customize", value: "customize" },
+    { label: "flexible", value: "flexible" },
     { label: "monthly", value: "monthly" },
     { label: "weekly", value: "weekly" },
   ];
@@ -436,6 +437,8 @@ export const variantsStatus = (val = "active") => {
     rejected: "bg-blue-100 text-blue-500",
     // return-display-status (open/completed already covered by purchase-order-status above)
     refunded: "bg-primary/10 text-primary",
+    // sales-order due date (flexible installment plan - no fixed schedule)
+    flexible: "bg-gray-100 text-gray-500",
   };
 
   return variants[

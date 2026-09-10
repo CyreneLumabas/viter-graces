@@ -54,8 +54,8 @@ export const PropsValues = (props, items) => {
     Number(values.sales_order_total_receivable_amount) -
     Number(values.sales_order_paid_amount);
 
-  if (values.sales_order_installment_type?.toLocaleLowerCase() === "customize") {
-    // Customize: no fixed schedule is created here - individual payments are
+  if (values.sales_order_installment_type?.toLocaleLowerCase() === "flexible") {
+    // Flexible: no fixed schedule is created here - individual payments are
     // recorded later from Finance > Accounts Receivable, so this just shows
     // the full balance until then.
     values.sales_order_installment_amount = Number(

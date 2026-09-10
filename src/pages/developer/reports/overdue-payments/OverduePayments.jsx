@@ -36,7 +36,7 @@ const OverduePayments = () => {
       classTh: "min-w-40",
       classTd: "",
       filterFn: "multiDateRange",
-      // Customize-type installments have no fixed schedule, so this can be
+      // Flexible-type installments have no fixed schedule, so this can be
       // null/empty - show "--" instead of a blank cell.
       cell: (info) => isEmptyItem(info.getValue(), "--"),
       meta: {

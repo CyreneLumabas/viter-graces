@@ -269,11 +269,39 @@ const InfiniteTable = ({
       multiDateRange: (row, columnId, value) => {
         if (!Array.isArray(value) || value.length === 0) return true;
 
+        // Flexible-plan orders have no fixed due date to fall inside a
+        // range, so they're matched separately here and OR'd together with
+        // any selected date ranges (see MultiRangeDateFilter's allowFlexible
+        // prop) rather than one excluding the other. Other columns using
+        // this filterFn never produce a `.flexible` item, so this is a
+        // no-op for them.
+        const flexibleMarker = value.find((range) => range.flexible);
+        const ranges = value.filter((range) => !range.flexible);
+
+        if (flexibleMarker) {
+          const rowData = row.original;
+          const paymentTerms = rowData?.sales_order_payment_terms?.toLowerCase();
+          const installmentType =
+            rowData?.sales_order_installment_type?.toLowerCase();
+
+          // sales_order_installment_type defaults to "flexible" on every
+          // order regardless of payment terms, so this must also require
+          // payment terms = installment or it'd match every order.
+          const isFlexibleRow =
+            paymentTerms === "installment" &&
+            (["flexible", "customize"].includes(installmentType) ||
+              !row.getValue(columnId));
+
+          if (isFlexibleRow) return true;
+        }
+
+        if (ranges.length === 0) return false;
+
         const rowDateStr = toDateOnlyString(row.getValue(columnId));
         if (rowDateStr === null) return false;
         if (rowDateStr === undefined) return true;
 
-        return value.some(({ start, end }) => {
+        return ranges.some(({ start, end }) => {
           if (start && rowDateStr < start) return false;
           if (end && rowDateStr > end) return false;
           return true;

@@ -13,7 +13,7 @@ $data = json_decode($body, true);
 checkPayload($data);
 
 // Records one ad-hoc installment payment (date + amount + method) for a
-// Customize-type sales order - the Accounts Receivable equivalent of the
+// Flexible-type sales order - the Accounts Receivable equivalent of the
 // Sales Order modal's monthly/weekly schedule generation, entered one row
 // at a time instead of up front.
 $now = date("Y-m-d H:i:s");

@@ -21,6 +21,10 @@ const chipLabel = (item, statusOptions) => {
     return match ? match.label : item;
   }
 
+  if (item.flexible) {
+    return "Flexible";
+  }
+
   if ("start" in item || "end" in item) {
     // Same-date condensing: a "range" that's really just one day (From and
     // To both set to the same date) reads better as a single date than as

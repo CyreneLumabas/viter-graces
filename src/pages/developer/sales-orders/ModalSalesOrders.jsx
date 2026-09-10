@@ -334,7 +334,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
     validationAmount: false,
     sales_order_installment_type: isEmptyItem(
       itemEdit?.sales_order_installment_type,
-      "customize",
+      "flexible",
     ),
     sales_order_installment_type_day: isEmptyItem(
       itemEdit?.sales_order_installment_type_day,
@@ -911,20 +911,34 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                               defaultValue="monthly"
                               options={InstallmentType()}
                               onChange={(e) => {
+                                const selectedType =
+                                  e.target.options[e.target.selectedIndex].text;
+
                                 props.setFieldValue(
                                   "sales_order_installment_type_day",
                                   "",
                                 );
                                 props.setFieldValue(
                                   "sales_order_installment_type",
-                                  e.target.options[e.target.selectedIndex].text,
+                                  selectedType,
                                 );
+                                // Flexible has no fixed schedule, so there's no
+                                // single due date or payment count to hold -
+                                // it's recorded per payment in Accounts
+                                // Receivable instead.
+                                if (selectedType?.toLocaleLowerCase() === "flexible") {
+                                  props.setFieldValue("sales_order_due_date", "");
+                                  props.setFieldValue(
+                                    "sales_order_installment_count",
+                                    "0",
+                                  );
+                                }
                                 return e;
                               }}
                             />
                           </div>
                           {props.values.sales_order_installment_type?.toLocaleLowerCase() !==
-                          "customize" ? (
+                          "flexible" ? (
                             <>
                               <div className="relative">
                                 <InputSelectArrayWithOptions
@@ -960,7 +974,7 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                             <InputText
                               label={
                                 props.values.sales_order_installment_type?.toLocaleLowerCase() ===
-                                "customize"
+                                "flexible"
                                   ? "Total Balance"
                                   : "Installment Amount"
                               }
@@ -973,11 +987,10 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                           </div>
                         </div>
                         {props.values.sales_order_installment_type?.toLocaleLowerCase() ===
-                        "customize" ? (
+                        "flexible" ? (
                           <p className="text-sm text-gray-500 mt-1">
-                            Individual installment payments for a customized
-                            plan are recorded from Finance Accounts Receivable
-                            once this order is created.
+                            Due dates and schedule for flexible installment
+                            plans are managed under Accounts Receivable.
                           </p>
                         ) : (
                           ""
@@ -996,20 +1009,32 @@ const ModalSalesOrders = ({ itemEdit, cutomer = "" }) => {
                             {props.values.sales_order_installment_type}
                           </div>
                         </div>
+                        {props.values.sales_order_installment_type?.toLocaleLowerCase() !==
+                        "flexible" ? (
+                          <>
+                            <div className="  ">
+                              <p className="">Payment every</p>
+                              <div className="flex capitalize">
+                                {props.values.sales_order_installment_type_day}
+                              </div>
+                            </div>
+                            <div className="  ">
+                              <p className="">Installment count</p>
+                              <div className="flex capitalize">
+                                {props.values.sales_order_installment_count}
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          ""
+                        )}
                         <div className="  ">
-                          <p className="">Payment every</p>
-                          <div className="flex capitalize">
-                            {props.values.sales_order_installment_type_day}
-                          </div>
-                        </div>
-                        <div className="  ">
-                          <p className="">Installment count</p>
-                          <div className="flex capitalize">
-                            {props.values.sales_order_installment_count}
-                          </div>
-                        </div>
-                        <div className="  ">
-                          <p className="">Installment Amount</p>
+                          <p className="">
+                            {props.values.sales_order_installment_type?.toLocaleLowerCase() ===
+                            "flexible"
+                              ? "Total Balance"
+                              : "Installment Amount"}
+                          </p>
                           <div className="flex capitalize">
                             <PhilippinePeso className={`size-3 mr-1 mt-1`} />
                             {props.values.sales_order_installment_amount}

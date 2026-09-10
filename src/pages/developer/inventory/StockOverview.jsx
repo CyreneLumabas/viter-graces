@@ -57,7 +57,6 @@ const StockOverview = () => {
       header: "SKU",
       classTh: "min-w-40",
       classTd: "",
-      meta: "",
       isTag: true,
       filterFn: "multiSelect",
       meta: {

@@ -107,7 +107,7 @@ function checkUpdateSales($object)
 // online breakdown, credit memo consumption, per-product balance recompute,
 // order status, and next due date - shared by update.php (paying an existing
 // installment row) and create.php (recording a brand-new ad-hoc payment for a
-// Customize-type order). $val must already carry installment_payment_aid /
+// Flexible-type order). $val must already carry installment_payment_aid /
 // installment_payment_new_amount-relevant fields; this only touches the
 // sales_order side.
 function applyOrderPaymentEffects($val, $data, $valReturns)

@@ -7,6 +7,7 @@ import {
   PaymentTermsList,
 } from "@/layout/ArrayValue";
 import HeaderNav from "@/layout/headers/HeaderNav";
+import Pills from "@/components/Pills";
 import InfiniteTable from "@/layout/table/InfiniteTable";
 import useQueryData from "@/services/useQueryData";
 import { setIsAdd } from "@/store/StoreAction";
@@ -75,12 +76,31 @@ const SalesOrders = () => {
       classTh: "min-w-[10rem]",
       classTd: "",
       filterFn: "multiDateRange",
+      cell: (info) => {
+        const row = info.row.original;
+        const paymentTerms = row?.sales_order_payment_terms?.toLowerCase();
+        const installmentType = row?.sales_order_installment_type?.toLowerCase();
+        const dueDate = info.getValue();
+
+        // Flexible plans have no fixed schedule - due dates for individual
+        // payments live on the Accounts Receivable rows instead.
+        const isFlexible =
+          paymentTerms === "installment" &&
+          (["flexible", "customize"].includes(installmentType) || !dueDate);
+
+        if (isFlexible) {
+          return <Pills variant="flexible">Flexible</Pills>;
+        }
+
+        return dueDate;
+      },
       meta: {
         filterComponent: (column) => (
           <MultiRangeDateFilter
             column={column}
             testFilterId={"filter-due-date"}
             singleSidedExact
+            allowFlexible
           />
         ),
       },

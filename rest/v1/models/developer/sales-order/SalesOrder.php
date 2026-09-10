@@ -142,11 +142,31 @@ class SalesOrder
                 is_array($value)
                 && isset($value[0])
                 && is_array($value[0])
-                && array_key_exists('start', $value[0])
+                && (array_key_exists('start', $value[0]) || !empty($value[0]['flexible']))
             ) {
+                // A "flexible" marker (see MultiRangeDateFilter's
+                // allowFlexible prop) can appear alongside real date ranges
+                // here - both are OR'd together into the same clause so a
+                // row matches if it's flexible OR falls in any of the
+                // ranges, rather than one excluding the other.
                 $rangeClauses = [];
 
                 foreach ($value as $j => $range) {
+                    if (!empty($range['flexible'])) {
+                        // Flexible-plan orders have no fixed due date (see
+                        // installmentDetails() in sales-order/functions.php)
+                        // - match them by installment type (accepting the
+                        // legacy "customize" alias) or a null/blank due date
+                        // instead of a date comparison.
+                        // sales_order_installment_type defaults to
+                        // "flexible" on every order regardless of payment
+                        // terms (see ModalSalesOrders.jsx's initial values),
+                        // so this must also require payment terms =
+                        // installment or it would match every order.
+                        $rangeClauses[] = "(LOWER(sales_order_payment_terms) = 'installment' AND (LOWER(sales_order_installment_type) IN ('flexible', 'customize') OR $col IS NULL OR $col = ''))";
+                        continue;
+                    }
+
                     $hasStart = isset($range['start']) && trim((string) $range['start']) !== '';
                     $hasEnd = isset($range['end']) && trim((string) $range['end']) !== '';
 

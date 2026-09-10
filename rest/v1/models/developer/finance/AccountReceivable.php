@@ -400,7 +400,7 @@ class AccountReceivable
     }
 
     // create
-    // Records a brand-new, already-paid installment row for a Customize-type
+    // Records a brand-new, already-paid installment row for a Flexible-type
     // order (date + amount + method entered directly in Accounts Receivable) -
     // the counterpart to SalesOrder::createInstallment() for the
     // auto-generated monthly/weekly schedule.

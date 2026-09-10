@@ -293,25 +293,30 @@ function updateStatus($val, $data)
     if ((float)$val->sales_order_paid_amount == 0 && count($installmentData) == 0) {
         $val->sales_order_status = 'unpaid';
     }
-    //  IF THE PAYMENT IS PARTIAL BUT NO INSTALLMENT DATA
-    if (
-        $val->sales_order_due_date == "" &&
-        (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
-        && count($installmentData) == 0
-    ) {
-        $val->sales_order_status = 'overdue';
-    }
+    // Flexible-plan orders have no due date at all (installmentDetails() nulls
+    // it) - there's no fixed schedule to be "overdue" against, since AR tracks
+    // each payment's own due date instead. Skip the due-date-based checks
+    // below for them rather than treating a blank due date as overdue.
+    if ($val->sales_order_due_date != "" && $val->sales_order_due_date !== null) {
+        //  IF THE PAYMENT IS PARTIAL BUT NO INSTALLMENT DATA
+        if (
+            (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
+            && count($installmentData) == 0
+        ) {
+            $val->sales_order_status = 'overdue';
+        }
 
-    $due_date = date('Y-m-d');
-    $timestamp = strtotime($val->sales_order_due_date);
-    $val->sales_order_due_date = date("Y-m-d", $timestamp);
+        $due_date = date('Y-m-d');
+        $timestamp = strtotime($val->sales_order_due_date);
+        $val->sales_order_due_date = date("Y-m-d", $timestamp);
 
-    //  IF THE NEXT DUEDATE IS IN NEXT 3 DAY
-    if (
-        $val->sales_order_due_date <= $due_date &&
-        (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
-    ) {
-        $val->sales_order_status = 'overdue';
+        //  IF THE NEXT DUEDATE IS IN NEXT 3 DAY
+        if (
+            $val->sales_order_due_date <= $due_date &&
+            (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
+        ) {
+            $val->sales_order_status = 'overdue';
+        }
     }
 
     return;
@@ -422,11 +427,14 @@ function installmentDetails($val, $installmentItems, $data)
     $val->installment_payment_method = "";
 
     if (strtolower($val->sales_order_payment_terms) == "installment") {
-        // Customize: no fixed schedule to generate here - individual
+        // Flexible: no fixed schedule to generate here - individual
         // payments (date + amount + method) are added later from Finance >
         // Accounts Receivable, so no installment row is created up front.
+        // "customize" is accepted too for rows saved before the rename (see
+        // the data migration in rest/v1/db-backup/migrations/) that haven't
+        // been resaved through the UI yet.
         if (
-            strtolower($data['sales_order_installment_type']) != "customize"
+            !in_array(strtolower($data['sales_order_installment_type']), ["flexible", "customize"], true)
             && (float)$data['sales_order_installment_count'] > 0
         ) {
             // CREATE INSTALLMENT PAYMENT
@@ -467,6 +475,12 @@ function installmentDetails($val, $installmentItems, $data)
                     checkUpdateInstallmentByOrderNumber($val);
                 }
             }
+        } else {
+            // Flexible plan: no fixed schedule, so there's no single due date
+            // to show on the order - individual payment due dates live on
+            // the Accounts Receivable rows instead. Table/UI render "Flexible"
+            // whenever this is null.
+            $val->sales_order_due_date = null;
         }
     }
 

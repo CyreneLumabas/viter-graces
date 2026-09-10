@@ -86,11 +86,11 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     },
   });
 
-  // Customize-type orders have no auto-generated schedule - individual
+  // Flexible-type orders have no auto-generated schedule - individual
   // installment payments (date + paid amount + method) are added here one
   // row at a time instead.
-  const isCustomizeInstallment =
-    itemEdit?.sales_order_installment_type?.toLowerCase() === "customize";
+  const isFlexibleInstallment =
+    itemEdit?.sales_order_installment_type?.toLowerCase() === "flexible";
 
   const [newInstallments, setNewInstallments] = React.useState([]);
 
@@ -133,7 +133,10 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
         setItems((prev) =>
           (prev || []).map((item) =>
             item === variables.__item
-              ? { ...item, installment_payment_aid: res?.["Account Receivable ID"] }
+              ? {
+                  ...item,
+                  installment_payment_aid: res?.["Account Receivable ID"],
+                }
               : item,
           ),
         );
@@ -152,7 +155,9 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     },
     onError: (error, variables) => {
       dispatch(setError(true));
-      dispatch(setMessage(error?.message || "Failed to save installment payment."));
+      dispatch(
+        setMessage(error?.message || "Failed to save installment payment."),
+      );
       rollbackNewInstallment(variables);
     },
   });
@@ -161,13 +166,17 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
   // server call fails - puts the row back into the editable draft list and
   // reverts the totals it had already been folded into.
   const rollbackNewInstallment = (variables) => {
-    setItems((prev) => (prev || []).filter((item) => item !== variables.__item));
+    setItems((prev) =>
+      (prev || []).filter((item) => item !== variables.__item),
+    );
     setNewInstallments((prev) => [...prev, variables.__row]);
     setTotalPaidAmount(
-      (prev) => Number(prev) - Number(variables.installment_payment_paid_amount),
+      (prev) =>
+        Number(prev) - Number(variables.installment_payment_paid_amount),
     );
     setTotalBalanceAmount(
-      (prev) => Number(prev) + Number(variables.installment_payment_paid_amount),
+      (prev) =>
+        Number(prev) + Number(variables.installment_payment_paid_amount),
     );
   };
 
@@ -339,14 +348,14 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     0,
   );
 
-  // Customize mode never has a pre-generated schedule - a row with no due
+  // Flexible mode never has a pre-generated schedule - a row with no due
   // date is stale/legacy data, not a real payment to act on, so it's kept
   // out of the table entirely rather than shown as a blank row.
-  const visibleItems = isCustomizeInstallment
+  const visibleItems = isFlexibleInstallment
     ? items?.filter((a) => !!a?.installment_payment_due_date)
     : items;
 
-  // Live total of whatever's currently typed into the new custom-installment
+  // Live total of whatever's currently typed into the new flexible-installment
   // rows (not yet saved), so Total Paid/Balance react on every keystroke -
   // same idea as `paidAmount` above for the existing rows' entered amounts.
   const newInstallmentsPaidTotal = newInstallments.reduce(
@@ -467,7 +476,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
 
       <div className="flex justify-between items-center mt-3 mb-1">
         <label></label>
-        {isCustomizeInstallment ? (
+        {isFlexibleInstallment ? (
           <button
             type="button"
             className="cursor-pointer flex items-center justify-center text-dark gap-2 px-3 py-3 bg-transparent rounded-md border-gray-300 border min-w-20 hover:bg-primary transition-all duration-300 ease-in-out hover:text-light dark:text-light"
@@ -487,21 +496,19 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
               <tr className="sm:table-row sticky top-0 uppercase dark:bg-[#0b111e] border-0! ">
                 <th className="w-px dark:bg-gray-900! bg-gray-100!">#</th>
                 <th className={`min-w-40  dark:bg-gray-900! bg-gray-100!`}>
-                  {isCustomizeInstallment ? "Date" : "Due Date"}
+                  {isFlexibleInstallment ? "Date" : "Due Date"}
                 </th>
-                {!isCustomizeInstallment ? (
+                {!isFlexibleInstallment ? (
                   <th className={` dark:bg-gray-900! bg-gray-100!`}>Amount</th>
                 ) : (
                   ""
                 )}
                 <th
-                  className={`min-w-30! dark:bg-gray-900! bg-gray-100! text-center`}
+                  className={`min-w-30! dark:bg-gray-900! bg-gray-100! text-right`}
                 >
                   Paid Amount
                 </th>
-                <th
-                  className={`min-w-32! dark:bg-gray-900! bg-gray-100! text-center`}
-                >
+                <th className={`min-w-32! dark:bg-gray-900! bg-gray-100!`}>
                   Method
                 </th>
                 <th></th>
@@ -524,7 +531,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                       <td className=" dark:bg-gray-900! ">
                         {a?.installment_payment_due_date}
                       </td>
-                      {!isCustomizeInstallment ? (
+                      {!isFlexibleInstallment ? (
                         <td className=" dark:bg-gray-900! ">
                           <AmountWithPesoSign
                             classN="size-3"
@@ -588,7 +595,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                               amount={Number(a.installment_payment_paid_amount)}
                             />
                           </td>
-                          <td className="capitalize">
+                          <td className="capitalize ">
                             {a?.installment_payment_method || "-"}
                           </td>
                           <td></td>
@@ -653,21 +660,24 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                         ))}
                     </select>
                   </td>
-                  <td className="flex items-center gap-1">
-                    <button
-                      className="text-white bg-gray-500 hover:bg-green-800 rounded-sm p-1 text-[10px]"
-                      type="button"
-                      onClick={() => handleSaveNewInstallment(row)}
-                    >
-                      Paid
-                    </button>
-                    <button
-                      type="button"
-                      className="text-red-500 text-xl"
-                      onClick={() => handleRemoveNewInstallment(index)}
-                    >
-                      ✕
-                    </button>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className={`text-white bg-gray-500 hover:bg-green-800 rounded-sm p-1 text-[10px]`}
+                        type="button"
+                        onClick={() => handleSaveNewInstallment(row)}
+                      >
+                        Paid
+                      </button>
+
+                      <button
+                        type="button"
+                        className="text-red-500 text-xl"
+                        onClick={() => handleRemoveNewInstallment(index)}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

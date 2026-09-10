@@ -395,10 +395,23 @@ export const MultiRangeDateFilter = ({
   // start/end BETWEEN logic (frontend filterFn and backend SQL) just sees
   // a same-day range and needs no changes of its own.
   singleSidedExact = false,
+  // When true, adds a standalone "Flexible Due Date" checkbox to the
+  // popover for columns that can hold flexible-installment orders (no fixed
+  // due date - see the Due Date column in SalesOrders.jsx). Checking it adds
+  // an { id: "flexible", flexible: true } marker alongside whatever date
+  // ranges are also selected - a row matches if it's flexible OR falls in
+  // any of the ranges (all OR'd together), so the two work at the same time
+  // rather than one disabling the other. Unrelated columns never pass this
+  // prop, so their behavior is unchanged.
+  allowFlexible = false,
 }) => {
   const appliedValue = column.getFilterValue() || [];
   const { isOpen, setIsOpen, draft, setDraft, wrapperRef, handleClose, open } =
     useFilterPopover(appliedValue);
+
+  const hasFlexibleDraft =
+    allowFlexible && draft.some((range) => range.flexible);
+  const draftRanges = draft.filter((range) => !range.flexible);
 
   const addRange = () => {
     setDraft((prev) => [...prev, { id: nextRangeId(), start: "", end: "" }]);
@@ -417,8 +430,16 @@ export const MultiRangeDateFilter = ({
     );
   };
 
+  const toggleFlexible = (e) => {
+    setDraft((prev) =>
+      e.target.checked
+        ? [{ id: "flexible", flexible: true }, ...prev]
+        : prev.filter((range) => !range.flexible),
+    );
+  };
+
   const applyFilter = () => {
-    const validRanges = draft
+    const validRanges = draftRanges
       .filter((range) => range.start !== "" || range.end !== "")
       .map((range) =>
         singleSidedExact && (range.start === "" || range.end === "")
@@ -429,7 +450,13 @@ export const MultiRangeDateFilter = ({
             }
           : range,
       );
-    column.setFilterValue(validRanges.length ? validRanges : undefined);
+
+    const nextValue = [
+      ...(hasFlexibleDraft ? [{ id: "flexible", flexible: true }] : []),
+      ...validRanges,
+    ];
+
+    column.setFilterValue(nextValue.length ? nextValue : undefined);
     setIsOpen(false);
   };
 
@@ -439,12 +466,21 @@ export const MultiRangeDateFilter = ({
     setIsOpen(false);
   };
 
-  const label =
-    appliedValue.length === 0
-      ? null
-      : appliedValue.length === 1
-        ? dateRangeLabel(appliedValue[0])
-        : `${appliedValue.length} date ranges`;
+  const appliedRanges = appliedValue.filter((range) => !range.flexible);
+  const appliedHasFlexible = appliedValue.some((range) => range.flexible);
+
+  const label = appliedValue.length
+    ? [
+        appliedHasFlexible ? "Flexible" : null,
+        appliedRanges.length === 1
+          ? dateRangeLabel(appliedRanges[0])
+          : appliedRanges.length > 1
+            ? `${appliedRanges.length} date ranges`
+            : null,
+      ]
+        .filter(Boolean)
+        .join(" + ")
+    : null;
 
   return (
     <div className="relative" ref={wrapperRef} data-testid={testFilterId}>
@@ -458,11 +494,24 @@ export const MultiRangeDateFilter = ({
 
       {isOpen && (
         <div className="absolute z-50 mt-1 w-90 max-w-[85vw] border border-gray-100 rounded-lg shadow-lg bg-white dark:bg-[#0b111e] p-3">
+          {allowFlexible && (
+            <label className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-gray-100 dark:border-gray-700">
+              <input
+                type="checkbox"
+                checked={hasFlexibleDraft}
+                onChange={toggleFlexible}
+                data-testid={`${testFilterId}_flexible`}
+                className="w-5! mt-0!"
+              />
+              Flexible Due Date
+            </label>
+          )}
+
           <div className="flex flex-col gap-2 max-h-60 overflow-auto">
-            {draft.length === 0 && (
+            {draftRanges.length === 0 && (
               <p className="text-sm text-gray-400">No date ranges added yet</p>
             )}
-            {draft.map((range) => (
+            {draftRanges.map((range) => (
               <div key={range.id} className="flex items-center gap-1">
                 <label className="flex items-center gap-1 w-full text-xs text-gray-500 dark:text-white">
                   <input
