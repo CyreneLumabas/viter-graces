@@ -184,6 +184,7 @@ const Returns = () => {
           />
         ),
       },
+      status_option: ActiveInActiveStatus("restocked-status"),
     },
   ];
 

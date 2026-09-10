@@ -11,8 +11,15 @@ const chipKey = (item) => (item && typeof item === "object" ? item.id : item);
 
 const wordDate = (isoDate) => (isoDate ? DateFormat(isoDate) : "…");
 
-const chipLabel = (item) => {
-  if (!item || typeof item !== "object") return item;
+const chipLabel = (item, statusOptions) => {
+  if (!item || typeof item !== "object") {
+    // Scalar filter values (e.g. the Active/Inactive status filter's 1/0)
+    // are stored as the raw bit so they can be sent straight back to the
+    // API - resolve them to their human-readable label here, the same
+    // status_option list the filter dropdown and status badges use.
+    const match = statusOptions?.find((option) => option.value === item);
+    return match ? match.label : item;
+  }
 
   if ("start" in item || "end" in item) {
     // Same-date condensing: a "range" that's really just one day (From and
@@ -41,6 +48,7 @@ const ActiveFilterTagBar = ({ table, columnFilters, setColumnFilters }) => {
       id: filter.id,
       label: table?.getColumn(filter.id)?.columnDef?.header || filter.id,
       values: filter.value,
+      statusOptions: table?.getColumn(filter.id)?.columnDef?.status_option,
     }));
 
   if (groups.length === 0) return null;
@@ -73,7 +81,7 @@ const ActiveFilterTagBar = ({ table, columnFilters, setColumnFilters }) => {
           </span>
           {group.values.map((value) => {
             const key = chipKey(value);
-            const label = chipLabel(value);
+            const label = chipLabel(value, group.statusOptions);
             return (
               <span
                 key={key}

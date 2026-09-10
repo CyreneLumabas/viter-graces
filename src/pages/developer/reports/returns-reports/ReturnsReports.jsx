@@ -148,6 +148,7 @@ const ReturnsReports = () => {
           />
         ),
       },
+      status_option: ActiveInActiveStatus("restocked-status"),
     },
     ...(Number(ProductOwnerId(store)) > 0
       ? []
