@@ -361,11 +361,13 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     0,
   );
 
-  // Flexible mode never has a pre-generated schedule - a row with no due
-  // date is stale/legacy data, not a real payment to act on, so it's kept
-  // out of the table entirely rather than shown as a blank row.
+  // Unified flow (non-installment + Flexible installment) has no pre-generated
+  // schedule to show - the backend still auto-creates one open placeholder row
+  // per order, but until a payment is actually logged via "+ Add Payment" the
+  // table should read empty, same as a fresh Flexible order. Only committed
+  // (fully paid) entries are shown; a not-yet-paid placeholder stays hidden.
   const visibleItems = useUnifiedPaymentFlow
-    ? items?.filter((a) => !!a?.installment_payment_due_date)
+    ? items?.filter((a) => Number(a?.installment_payment_is_paid) === 1)
     : items;
 
   // Live total of whatever's currently typed into the new flexible-installment
@@ -419,6 +421,11 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
       payment_cash_amount: a?.payment_cash_amount || 0,
       payment_check_amount: a?.payment_check_amount || 0,
       payment_online_amount: a?.payment_online_amount || 0,
+      // Live row state (this row's just-updated paid amount included) - not
+      // itemEdit.installmentItems, which is frozen at modal-open and would
+      // make the server recompute sales_order_due_date off stale data, same
+      // as handleSaveNewInstallment already does for the Flexible path.
+      installmentItems: updated,
     };
 
     let data = {

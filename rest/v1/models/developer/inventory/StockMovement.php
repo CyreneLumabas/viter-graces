@@ -521,23 +521,38 @@ class StockMovement
         return $query;
     }
 
-    // read all
-    public function readAllLocation($allowedColumns)
+    // read all location
+    public function readAllLocation()
     {
-        $params = [];
-        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
         try {
             $sql = "select ";
             $sql .= "stock_movement_location as name ";
-            $sql .= "from {$this->tblProducts} ";
-            $sql .= " where true ";
-            if (!empty($filterColumn)) {
-                $sql .= " and " . implode(" and ", $filterColumn);
-            }
+            $sql .= "from {$this->tblMovementStock} ";
+            $sql .= "where stock_movement_location != '' ";
             $sql .= " group by stock_movement_location ";
             $sql .= " order by stock_movement_location desc ";
             $query = $this->connection->prepare($sql);
-            $query->execute($params);
+            $query->execute();
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all notes
+    public function readAllNotes()
+    {
+        try {
+            $sql = "select ";
+            $sql .= "stock_movement_notes as name ";
+            $sql .= "from {$this->tblMovementStock} ";
+            $sql .= "where stock_movement_notes != '' ";
+            $sql .= " group by stock_movement_notes ";
+            $sql .= " order by stock_movement_notes desc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute();
         } catch (PDOException $ex) {
             logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
             $query = false;

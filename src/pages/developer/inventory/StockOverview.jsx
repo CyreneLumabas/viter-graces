@@ -63,7 +63,7 @@ const StockOverview = () => {
         filterComponent: (column) => (
           <MultiSelectCheckboxFilter
             column={column}
-            path="products/read-all-by-sku"
+            path="products/read-all-by-filters?type=sku"
             testFilterId={"filter-product-sku"}
           />
         ),
@@ -73,13 +73,13 @@ const StockOverview = () => {
       accessorKey: "stock_movement_location",
       header: "Location",
       classTh: "min-w-40",
-      classTd: "",
+      classTd: "line-clamp-2 max-w-40",
       filterFn: "multiSelect",
       meta: {
         filterComponent: (column) => (
           <MultiSelectCheckboxFilter
             column={column}
-            path="stock-movement/read-all-by-location"
+            path="stock-movement/read-all-by-location?type=location"
             testFilterId={"filter-product-location"}
           />
         ),
@@ -125,7 +125,7 @@ const StockOverview = () => {
         filterComponent: (column) => (
           <MultiSelectCheckboxFilter
             column={column}
-            path="products/read-all-by-unit"
+            path="products/read-all-by-filters?type=unit"
             testFilterId={"filter-product-sku"}
           />
         ),

@@ -1,32 +1,37 @@
 <?php
 
 // set http header
-require '../../../../core/header.php';
+require '../../../core/header.php';
 // use needed functions
-require '../../../../core/functions.php';
+require '../../../core/functions.php';
 require 'functions.php';
 // use needed classes
-require '../../../../models/developer/inventory/StockMovement.php';
+require '../../../models/developer/products/Products.php';
 // check database connection
 $conn = null;
 $conn = checkDbConnection();
 // make instance of classes
-$val = new StockMovement($conn);
+$val = new Products($conn);
 // validate api key
 if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     checkApiKey();
     $val->filters = [];
+    
     // Get the requested type
     $type = isset($_GET['type']) ? $_GET['type'] : '';
 
     switch ($type) {
 
-        case 'location':
-            $query = checkReadAllLocation($val);
+        case 'sku':
+            $query = checkReadAllSku($val);
             break;
 
-        case 'notes':
-            $query = checkReadAllNotes($val);
+        case 'category':
+            $query = checkReadAllCategory($val);
+            break;
+
+        case 'unit':
+            $query = checkReadAllUnit($val);
             break;
 
         default:
@@ -34,7 +39,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
 
             echo json_encode([
                 'status' => 400,
-                'message' => 'Invalid type. Use location and notes.'
+                'message' => 'Invalid type. Use sku, category, or unit.'
             ]);
 
             exit;
