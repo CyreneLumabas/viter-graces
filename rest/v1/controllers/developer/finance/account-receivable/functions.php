@@ -187,8 +187,17 @@ function applyOrderPaymentEffects($val, $data, $valReturns)
         }
     }
 
+    // No unpaid schedule row to advance to - this is the normal case for
+    // Due On Receipt / Net-terms orders (and a fully-settled fixed Installment
+    // plan), since graces_installment_payment no longer gets a row for those
+    // terms (see installmentDetails() in sales-order/functions.php). Keep the
+    // due date already on graces_sales_order instead of resetting it to
+    // today's date.
     if ($val->sales_order_due_date == "") {
-        $val->sales_order_due_date = date("Y-m-d");
+        $existingDueDate = $ordersItems[0]['sales_order_due_date'] ?? null;
+        $val->sales_order_due_date = $existingDueDate
+            ? date('Y-m-d', strtotime($existingDueDate))
+            : date("Y-m-d");
     }
 
     foreach ($ordersItems as $item) {

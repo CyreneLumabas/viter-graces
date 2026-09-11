@@ -483,27 +483,11 @@ function installmentDetails($val, $installmentItems, $data)
 
         $val->sales_order_due_date = date("Y-m-d", strtotime($val->sales_order_date . ' +' . (float)$termsDaysCount . ' days'));
 
-        $val->installment_payment_code_id = 0;
-        $val->installment_payment_is_paid = 0;
-        $val->installment_payment_aid = 0;
-        $val->installment_payment_code = 'sales-order';
-        $val->installment_payment_due_date = $val->sales_order_due_date;
-        $val->installment_payment_code_number = $val->sales_order_number;
-        $val->installment_payment_customer_id = $val->sales_order_customer_id;
-        $val->installment_payment_customer_name = $val->sales_order_customer_name;
-        $val->installment_payment_method = $val->sales_order_payment_method;
-        $val->installment_payment_amount = $val->sales_order_total_balance_amount;
-
-        if ((float)$val->sales_order_total_balance_amount <= 0) {
-            $val->installment_payment_is_paid = 1;
-            $val->installment_payment_paid_amount = $val->installment_payment_amount;
-            $val->installment_payment_received_id = $val->sales_order_received_by_id;
-            $val->installment_payment_received_name = $val->sales_order_received_by_name;
-        }
-        checkCreateInstallment($val);
-
+        // Not an active fixed/scheduled Installment plan (e.g. "Due On
+        // Receipt", "Net 10", "Net 15") - no row is written to
+        // graces_installment_payment for these terms.
         if (count($installmentItems) > 0) {
-            // if cahnges in to not due on receipt and not inatallment
+            // if changes in to not due on receipt and not installment
             for ($a = 0; $a < count($installmentItems); $a++) {
                 $val->installment_payment_aid = $installmentItems[$a]['installment_payment_aid'];
                 checkDeleteinstallmentById($val);
@@ -521,28 +505,10 @@ function installmentDetails($val, $installmentItems, $data)
 
         $val->sales_order_due_date = $val->sales_order_date;
 
-        $val->installment_payment_code_id = 0;
-        $val->installment_payment_is_paid = 0;
-        $val->installment_payment_aid = 0;
-        $val->installment_payment_code = 'sales-order';
-        $val->installment_payment_due_date = $val->sales_order_due_date;
-        $val->installment_payment_code_number = $val->sales_order_number;
-        $val->installment_payment_customer_id = $val->sales_order_customer_id;
-        $val->installment_payment_customer_name = $val->sales_order_customer_name;
-        $val->installment_payment_method = $val->sales_order_payment_method;
-        $val->installment_payment_amount = $val->sales_order_total_balance_amount;
-
-        if ((float)$val->sales_order_total_balance_amount <= 0) {
-            $val->installment_payment_is_paid = 1;
-            $val->installment_payment_paid_amount = $val->installment_payment_amount;
-            $val->installment_payment_received_id = $val->sales_order_received_by_id;
-            $val->installment_payment_received_name = $val->sales_order_received_by_name;
-        }
-
-        checkCreateInstallment($val);
-
+        // "Due On Receipt" is not an active fixed/scheduled Installment plan
+        // - no row is written to graces_installment_payment for it.
         if (count($installmentItems) > 0) {
-            // if cahnges in to not due on receipt and not inatallment
+            // if changes in to not due on receipt and not installment
             for ($a = 0; $a < count($installmentItems); $a++) {
                 $val->installment_payment_aid = $installmentItems[$a]['installment_payment_aid'];
                 checkDeleteinstallmentById($val);

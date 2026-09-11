@@ -161,6 +161,21 @@ const SalesOrders = () => {
       },
     },
     {
+      accessorKey: "sales_order_notes",
+      header: "notes",
+      // Notes is intentionally called out with its own light red background
+      // (only this column, not the whole row) so it stands out next to Balance.
+      // group-hover (the <tr> in InfiniteTable carries "group") darkens this
+      // cell's red tint on row hover instead of the usual gray/blue, so the
+      // row hover feedback still shows through here rather than being fully
+      // painted over by the opaque background.
+      classTh: "min-w-[10rem] bg-red-50! dark:bg-red-950/40!",
+      classTd:
+        "capitalize bg-red-50! dark:bg-red-950/40! group-hover:bg-red-100! dark:group-hover:bg-red-950/60!",
+      filterFn: "",
+      meta: "",
+    },
+    {
       accessorKey: "sales_order_payment_method",
       header: "method",
       classTh: "min-w-[10rem]",
@@ -209,14 +224,6 @@ const SalesOrders = () => {
           />
         ),
       },
-    },
-    {
-      accessorKey: "sales_order_notes",
-      header: "notes",
-      classTh: "min-w-[10rem]",
-      classTd: "capitalize ",
-      filterFn: "",
-      meta: "",
     },
     {
       accessorKey: "action",
