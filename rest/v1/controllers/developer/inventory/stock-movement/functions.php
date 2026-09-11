@@ -33,3 +33,11 @@ function checkReadAllLocation($object, $allowedColumns = [])
     checkQuery($query, "Empty records. (read all location)");
     return $query;
 }
+
+// Read all notes
+function checkReadAllNotes($object, $allowedColumns = [])
+{
+    $query = $object->readAllNotes($allowedColumns);
+    checkQuery($query, "Empty records. (read all notes)");
+    return $query;
+}

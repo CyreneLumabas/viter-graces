@@ -16,12 +16,35 @@ $val = new StockMovement($conn);
 if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     checkApiKey();
     $val->filters = [];
-    $query = checkReadAllLocation($val);
+    // Get the requested type
+    $type = isset($_GET['type']) ? $_GET['type'] : '';
+
+    switch ($type) {
+
+        case 'location':
+            $query = checkReadAllLocation($val);
+            break;
+
+        case 'notes':
+            $query = checkReadAllNotes($val);
+            break;
+
+        default:
+            http_response_code(400);
+
+            echo json_encode([
+                'status' => 400,
+                'message' => 'Invalid type. Use location and notes.'
+            ]);
+
+            exit;
+    }
+
     http_response_code(200);
+
     getQueriedData($query);
+
+    exit;
 }
 
-http_response_code(200);
-// when authentication is cancelled
-// header('HTTP/1.0 401 Unauthorized');
 checkAccess();

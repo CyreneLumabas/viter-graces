@@ -30,12 +30,16 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
             $query = checkReadAllCategory($val);
             break;
 
+        case 'unit':
+            $query = checkReadAllUnit($val);
+            break;
+
         default:
             http_response_code(400);
 
             echo json_encode([
                 'status' => 400,
-                'message' => 'Invalid type. Use sku and category.'
+                'message' => 'Invalid type. Use sku, category, or unit.'
             ]);
 
             exit;

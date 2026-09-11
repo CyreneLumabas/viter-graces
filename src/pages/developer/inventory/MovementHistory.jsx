@@ -41,7 +41,10 @@ const MovementHistory = () => {
       filterFn: "multiDateRange",
       meta: {
         filterComponent: (column) => (
-          <MultiRangeDateFilter column={column} testFilterId={"filter-movement-date"} />
+          <MultiRangeDateFilter
+            column={column}
+            testFilterId={"filter-movement-date"}
+          />
         ),
       },
     },
@@ -81,7 +84,10 @@ const MovementHistory = () => {
       filterFn: "multiRange",
       meta: {
         filterComponent: (column) => (
-          <MultiRangeAmountFilter column={column} testFilterId={"filter-before"} />
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-before"}
+          />
         ),
       },
     },
@@ -93,7 +99,10 @@ const MovementHistory = () => {
       filterFn: "multiRange",
       meta: {
         filterComponent: (column) => (
-          <MultiRangeAmountFilter column={column} testFilterId={"filter-after"} />
+          <MultiRangeAmountFilter
+            column={column}
+            testFilterId={"filter-after"}
+          />
         ),
       },
     },
@@ -102,7 +111,16 @@ const MovementHistory = () => {
       header: "Location",
       classTh: "min-w-40",
       classTd: " line-clamp-2 max-w-40",
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path="stock-movement/read-all-by-location?type=location"
+            testFilterId={"filter-product-location"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "stock_movement_product_owner_name",
@@ -125,6 +143,16 @@ const MovementHistory = () => {
       header: "Notes",
       classTh: "min-w-40",
       classTd: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path="stock-movement/read-all-by-location?type=notes"
+            testFilterId={"filter-product-notes"}
+          />
+        ),
+      },
     },
   ];
 

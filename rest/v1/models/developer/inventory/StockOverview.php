@@ -468,7 +468,7 @@ class StockOverview
             $sql .= "MAX(p.products_name) as name, ";
             $sql .= "MAX(p.products_owner_name) as products_owner_name, ";
             $sql .= "MAX(p.products_aid) as products_aid, ";
-            // $sql .= "MAX(ms.stock_movement_location) as stock_movement_location, ";
+            $sql .= "MAX(ms.stock_movement_location) as stock_movement_location, ";
             // $sql .= "MAX(ms.stock_movement_is_active) as is_active, ";
             // $sql .= "MAX(ms.stock_movement_is_active) as stock_movement_is_active, ";
             // $sql .= "MAX(ms.stock_movement_product_name) as stock_movement_product_name, ";
@@ -555,7 +555,7 @@ class StockOverview
             $sql .= "MAX(p.products_name) as name, ";
             $sql .= "MAX(p.products_owner_name) as products_owner_name, ";
             $sql .= "MAX(p.products_aid) as products_aid, ";
-            // $sql .= "MAX(ms.stock_movement_location) as stock_movement_location, ";
+            $sql .= "MAX(ms.stock_movement_location) as stock_movement_location, ";
             // $sql .= "MAX(ms.stock_movement_is_active) as is_active, ";
             // $sql .= "MAX(ms.stock_movement_is_active) as stock_movement_is_active, ";
             // $sql .= "MAX(ms.stock_movement_product_name) as stock_movement_product_name, ";
