@@ -22,7 +22,15 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { FaCaretDown } from "react-icons/fa";
 import InfinitePerTabsMobile from "./InfinitePerTabsMobile";
 import InfiniteSubTable from "./InfiniteSubTable";
+import { renderCellContent } from "./function-table";
 import { getAdminDeveloperRole } from "@/utilities/roleValidation";
+
+// Accessor keys rendered as their own bespoke block inside the collapsed
+// row's detail panel (array-of-contacts / delivery) rather than the generic
+// detail grid below - only shown when the caller's `columns` actually define
+// them, so a module without these fields doesn't render empty labels.
+const CONTACT_PERSON_ACCESSOR_KEY = "suppliers_contact_person";
+const DELIVERY_ACCESSOR_KEY = "suppliers_delivery";
 
 const InfinitePerTabs = ({
   columns,
@@ -44,8 +52,6 @@ const InfinitePerTabs = ({
   const search = React.useRef(null);
   const [onSearch, setOnSearch] = React.useState(false);
   const observer = useRef();
-  let counter = 1;
-  let counterMobile = 1;
 
   // ACTIONS ADD
   const handleAdd = () => {
@@ -85,21 +91,15 @@ const InfinitePerTabs = ({
       return undefined;
     },
     refetchOnWindowFocus: refetchOnWindowFocus,
-    // staleTime: 1000 * 60 * 5, // 5 mins → no refetch when revisiting
-    // gcTime: 1000 * 60 * 30, // keep cache for 30 mins
-    // refetchOnMount: false,
-    // refetchOnWindowFocus: false,
-    // refetchOnReconnect: false,
-    // enabled: !isStatic,
   });
 
-  // // Flatten pages into single array
+  // Flatten pages into single array
   const tableData = useMemo(
     () => data?.pages?.flatMap((page) => page.data || []) ?? [],
     [data],
   );
 
-  // // Infinite scroll trigger
+  // Infinite scroll trigger
   const lastRowRef = useCallback(
     (node) => {
       if (isFetchingNextPage) return;
@@ -125,7 +125,25 @@ const InfinitePerTabs = ({
   });
 
   const rows = table?.getRowModel()?.rows;
-  let arrayContact = [];
+  const isEmpty = status !== "pending" && rows?.length === 0;
+
+  // The primary (collapsed-row) columns are whatever the caller flags with
+  // `isPrimaryRow` - same "config drives layout" convention InfiniteTable
+  // uses for its columns, so this table is reusable for any module, not just
+  // suppliers. `isMobileTitle` (the existing convention shared with
+  // InfiniteDefaultTableMobileCard/CustomerMobile) marks which one of those
+  // also carries the expand/collapse toggle.
+  const primaryHeaders = table
+    ?.getHeaderGroups()?.[0]
+    ?.headers?.filter((header) => header.column.columnDef.isPrimaryRow);
+
+  const hasContactPersonColumn = columns?.some(
+    (column) => column.accessorKey === CONTACT_PERSON_ACCESSOR_KEY,
+  );
+  const hasDeliveryColumn = columns?.some(
+    (column) => column.accessorKey === DELIVERY_ACCESSOR_KEY,
+  );
+
   return (
     <>
       <div className="sm:flex justify-between flex-row-reverse mb-3 gap-4 ">
@@ -148,426 +166,265 @@ const InfinitePerTabs = ({
           />
         </div>
       </div>
-      <div className="py-4">
-        <div className="space-y-3">
-          {(status === "pending" || rows?.length === 0) && (
-            <div colSpan="100%" className="p-10">
-              {status === "pending" ? (
-                <TableLoading count={20} cols={3} />
-              ) : (
-                <NoData />
-              )}
-            </div>
-          )}
-          {error && (
-            <div colSpan="100%" className="p-10">
-              <ServerError />
-            </div>
-          )}
 
-          {rows?.map((item, index) => {
-            const isLastRow = index === rows?.length - 1;
-            const isOpen = openRow === item.id;
-            arrayContact = getConvertStringToJSONparseData(
-              rows[index]?.original?.suppliers_contact_person,
-            );
+      <div className="relative rounded-xl overflow-auto z-0">
+        <table className="overflow-visible md:border md:border-gray-300 dark:border-[#0b111e]">
+          <thead className="hidden lg:table-header-group">
+            <tr className="sticky top-0 uppercase dark:bg-[#0b111e] border-0! z-10">
+              <th className="w-px">#</th>
+              <th className="w-px"></th>
+              {primaryHeaders?.map((header) => (
+                <th
+                  key={header.id}
+                  className={isEmptyItem(
+                    header.column.columnDef.classTh,
+                    "min-w-40",
+                  )}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </th>
+              ))}
+              <th className="text-center w-[7rem]">Action</th>
+            </tr>
+          </thead>
 
-            return (
-              <div
-                key={index}
-                ref={isLastRow ? lastRowRef : null}
-                className="rounded-2xl border border-gray-300 bg-white shadow-sm dark:border-[#0b111e] dark:bg-[#0b111e] "
-                data-testid="table-row"
-              >
-                <div className="p-2 lg:px-5">
-                  <div className="hidden gap-2 lg:flex items-center">
-                    <div className="text-gray-500 text-sm dark:text-light ">
-                      <span>{counter++}.</span>
-                    </div>
-                    <div
-                      onClick={() => setOpenRow(isOpen ? null : item.id)}
-                      className="flex items-center gap-2 text-left "
-                    >
-                      <TableDefaultStatusDot
-                        dataArray={rows[index]?.original}
+          <tbody>
+            {(status === "pending" || isEmpty) && (
+              <tr>
+                <td colSpan="100%" className="p-10">
+                  {status === "pending" ? (
+                    <TableLoading count={20} cols={3} />
+                  ) : (
+                    <NoData />
+                  )}
+                </td>
+              </tr>
+            )}
+            {error && (
+              <tr>
+                <td colSpan="100%" className="p-10">
+                  <ServerError />
+                </td>
+              </tr>
+            )}
+
+            {rows?.map((row, index) => {
+              const rowData = row.original;
+              const isOpen = openRow === row.id;
+              const arrayContact = getConvertStringToJSONparseData(
+                rowData?.suppliers_contact_person,
+              );
+              const toggle = () => setOpenRow(isOpen ? null : row.id);
+              const primaryCells = row
+                .getVisibleCells()
+                .filter((cell) => cell.column.columnDef.isPrimaryRow);
+
+              return (
+                <React.Fragment key={row.id}>
+                  {/* DESKTOP ROW */}
+                  <tr
+                    className="hidden lg:table-row group"
+                    data-testid="table-row"
+                  >
+                    <td className="text-center">{index + 1}.</td>
+                    <td>
+                      <TableDefaultStatusDot dataArray={rowData} />
+                    </td>
+                    {primaryCells.map((cell) =>
+                      cell.column.columnDef.isMobileTitle ? (
+                        <td key={cell.id}>
+                          <button
+                            type="button"
+                            onClick={toggle}
+                            className="flex items-center gap-2 cursor-pointer hover:underline"
+                            data-testid="button-open-customer-tab"
+                          >
+                            <span className="text-sm font-medium text-gray-800 dark:text-light">
+                              {rowData?.[cell.column.columnDef.accessorKey]}
+                            </span>
+                            <FaCaretDown
+                              className={`h-4 w-4 text-gray-600 dark:text-light font-bold transition-transform ${
+                                isOpen ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                        </td>
+                      ) : (
+                        <td key={cell.id}>
+                          {renderCellContent(cell, rowData, path)}
+                        </td>
+                      ),
+                    )}
+                    <td className="text-center">
+                      {getAdminDeveloperRole(store) &&
+                        columns
+                          ?.filter((column) => column.accessorKey === "action")
+                          .map((column) => (
+                            <ActionButtonTable
+                              key={column.accessorKey}
+                              item={column}
+                              dataArray={rowData}
+                              setData={setData}
+                              setItemEdit={setItemEdit}
+                              path={path}
+                            />
+                          ))}
+                    </td>
+                  </tr>
+
+                  {/* MOBILE ROW - reuses the existing mobile card unchanged */}
+                  <tr className="table-row lg:hidden">
+                    <td colSpan="100%" className="p-0!">
+                      <InfinitePerTabsMobile
+                        item={row}
+                        rows={rows}
+                        path={path}
+                        index={index}
+                        setItemEdit={setItemEdit}
+                        setData={setData}
+                        isOpen={isOpen}
+                        setOpenRow={setOpenRow}
+                        ishaveSubAdd={ishaveSubAdd}
                       />
-                      {item.getVisibleCells().map((aitem, akey) => {
-                        return (
-                          <React.Fragment key={akey}>
-                            <div className="hover:underline w-full">
-                              {aitem?.column?.columnDef?.header === "name" ? (
-                                <div
-                                  className="flex items-center gap-2 cursor-pointer "
-                                  data-testid="button-open-customer-tab"
-                                >
-                                  <span className="text-sm font-medium text-gray-800 dark:text-light min-w-40">
-                                    {rows[index]?.original?.name}
-                                  </span>
-                                  <FaCaretDown
-                                    className={`h-4 w-4 text-gray-600 dark:text-light font-bold transition-transform cursor-pointer ${
-                                      isOpen ? "rotate-180" : ""
-                                    }`}
-                                  />
-                                </div>
-                              ) : (
-                                ""
-                              )}
-                            </div>
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                    <div className="grid grid-cols-[7rem_1fr_10rem] gap-5 w-full">
-                      {item.getVisibleCells().map((ditem, dkey) => {
-                        return (
-                          <React.Fragment key={dkey}>
-                            {ditem?.column?.columnDef?.header ===
-                            "second_column" ? (
-                              <p className="text-xs text-gray-500 lg:hidden dark:text-light">
-                                {flexRender(
-                                  ditem?.column?.columnDef?.cell,
-                                  ditem?.getContext(),
-                                )}
-                              </p>
-                            ) : (
-                              ""
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                      {item.getVisibleCells().map((eitem, ekey) => {
-                        return (
-                          <React.Fragment key={ekey}>
-                            {eitem?.column?.columnDef?.header === "contact" ||
-                            eitem?.column?.columnDef?.header === "address" ? (
-                              <div className="text-sm text-gray-700 dark:text-light gap-1">
-                                <small className="capitalize">
-                                  {eitem?.column?.columnDef?.header}
-                                </small>
-                                <br />
+                    </td>
+                  </tr>
 
-                                <span className="text-xs text-gray-400 lg:hidden">
-                                  {eitem?.column?.columnDef?.icon}
-                                </span>
-                                <span className="">
-                                  {flexRender(
-                                    eitem?.column?.columnDef?.cell,
-                                    eitem?.getContext(),
-                                  )}
-                                </span>
-                              </div>
-                            ) : (
-                              ""
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
+                  {/* EXPANDED DETAILS */}
+                  {isOpen && (
+                    <tr>
+                      <td
+                        colSpan="100%"
+                        className="bg-[#F6F7F9] dark:bg-[#0b111e] border-t border-gray-200 dark:border-[#1f2b47] p-4"
+                      >
+                        <div className="grid xs:grid-cols-[1fr_1fr_1fr_12rem] gap-3 mb-3">
+                          {columns
+                            ?.filter(
+                              (column) =>
+                                !column.isPrimaryRow &&
+                                column.accessorKey !== "action" &&
+                                column.accessorKey !==
+                                  CONTACT_PERSON_ACCESSOR_KEY &&
+                                column.accessorKey !== DELIVERY_ACCESSOR_KEY,
+                            )
+                            .map((column) => {
+                              const value = rowData?.[column.accessorKey];
+                              const valItem = isEmptyItem(value, "none");
+                              const link =
+                                typeof column?.link === "function"
+                                  ? column.link(value)
+                                  : column?.link
+                                    ? `${column.link}${value}`
+                                    : "";
+                              const externalLink =
+                                link &&
+                                !/^https?:\/\//i.test(link) &&
+                                !/^mailto:/i.test(link) &&
+                                !/^tel:/i.test(link)
+                                  ? `https://${link}`
+                                  : link;
 
-                      <div className=" flex justify-end lg:items-center text-gray-700 dark:text-light gap-3">
-                        {item.getVisibleCells().map((bitem, bkey) => {
-                          return bitem?.column?.columnDef?.header ===
-                            "social" ? (
-                            <React.Fragment key={bkey}>
-                              {isEmptyItem(
-                                rows[index]?.original?.messenger,
-                                "",
-                              ) !== "" &&
-                              bitem?.column?.columnDef?.accessorKey ===
-                                "messenger" ? (
-                                <a
-                                  href={`${bitem?.column?.columnDef?.link}`}
-                                  target="_black"
-                                  className="tooltip-action-table "
-                                  data-tooltip={
-                                    bitem?.column?.columnDef?.accessorKey
-                                  }
-                                >
-                                  {bitem?.column?.columnDef?.icon}
-                                </a>
-                              ) : (
-                                ""
-                              )}
-                              {isEmptyItem(
-                                rows[index]?.original?.whatsapp,
-                                "",
-                              ) !== "" &&
-                              bitem?.column?.columnDef?.accessorKey ===
-                                "whatsapp" ? (
-                                <a
-                                  href={`${bitem?.column?.columnDef?.link}`}
-                                  target="_black"
-                                  className="tooltip-action-table "
-                                  data-tooltip={
-                                    bitem?.column?.columnDef?.accessorKey
-                                  }
-                                >
-                                  {bitem?.column?.columnDef?.icon}
-                                </a>
-                              ) : (
-                                ""
-                              )}
-                              {isEmptyItem(rows[index]?.original?.other, "") !==
-                                "" &&
-                              bitem?.column?.columnDef?.accessorKey ===
-                                "other" ? (
-                                <a
-                                  href={`${bitem?.column?.columnDef?.link}`}
-                                  className="tooltip-action-table "
-                                  data-tooltip={
-                                    bitem?.column?.columnDef?.accessorKey
-                                  }
-                                >
-                                  {bitem?.column?.columnDef?.icon}
-                                </a>
-                              ) : (
-                                ""
-                              )}
-                            </React.Fragment>
-                          ) : (
-                            ""
-                          );
-                        })}
-
-                        {getAdminDeveloperRole(store) && (
-                          <>
-                            {item.getVisibleCells().map((fitem, fkey) => {
                               return (
-                                <React.Fragment key={fkey}>
-                                  {fitem?.column?.columnDef?.accessorKey ===
-                                  "action" ? (
-                                    <ActionButtonTable
-                                      item={fitem?.column?.columnDef}
-                                      dataArray={rows[index]?.original}
-                                      setData={setData}
-                                      setItemEdit={setItemEdit}
-                                      path={path}
-                                    />
-                                  ) : (
-                                    ""
-                                  )}
-                                </React.Fragment>
-                              );
-                            })}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* MOBILE RESPONSIVE */}
-                  <InfinitePerTabsMobile
-                    item={item}
-                    rows={rows}
-                    path={path}
-                    index={index}
-                    setItemEdit={setItemEdit}
-                    setData={setData}
-                    isOpen={isOpen}
-                    setOpenRow={setOpenRow}
-                  />
-                </div>
-
-                {isOpen && (
-                  <div className="border-t border-gray-200 px-4 lg:px-5 pb-4 ">
-                    <div className="grid xs:grid-cols-[1fr_12rem] gap-3 mt-2 mb-1">
-                      {item.getVisibleCells().map((ditem, dkey) => {
-                        const column = ditem?.column?.columnDef;
-                        const value = ditem.getValue();
-                        const valItem = isEmptyItem(value, "none");
-
-                        const link =
-                          typeof column?.link === "function"
-                            ? column.link(value)
-                            : column?.link
-                              ? `${column.link}${value}`
-                              : "";
-
-                        const externalLink =
-                          link &&
-                          !/^https?:\/\//i.test(link) &&
-                          !/^mailto:/i.test(link) &&
-                          !/^tel:/i.test(link)
-                            ? `https://${link}`
-                            : link;
-
-                        const isContact =
-                          column?.header === "email" ||
-                          column?.header === "messenger" ||
-                          column?.header === "whatsapp" ||
-                          column?.header === "other social";
-
-                        return (
-                          <React.Fragment key={dkey}>
-                            {isContact ? (
-                              <div className="text-xs text-gray-500 lg:block hidden dark:text-light mb-0 wrap-break-word">
-                                <small className="font-bold text-xs uppercase text-[9px]">
-                                  {column?.header}
-                                </small>
-
-                                <br />
-
-                                <div className="flex gap-1 items-center">
-                                  {column?.icon}
-
-                                  {!column?.isHaveLink ||
-                                  isEmptyItem(value, "") === "" ? (
-                                    <span>{valItem}</span>
-                                  ) : (
-                                    <a
-                                      href={externalLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="cursor-pointer hover:text-blue-600 hover:underline"
-                                    >
-                                      {valItem}
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                            ) : null}
-                          </React.Fragment>
-                        );
-                      })}
-
-                      {item.getVisibleCells().map((ditem, dkey) => {
-                        const column = ditem?.column?.columnDef;
-                        const value = ditem.getValue();
-                        const valItem = isEmptyItem(value, "none");
-
-                        const link =
-                          typeof column?.link === "function"
-                            ? column.link(value)
-                            : column?.link
-                              ? `${column.link}${value}`
-                              : "";
-
-                        const externalLink =
-                          link &&
-                          !/^https?:\/\//i.test(link) &&
-                          !/^mailto:/i.test(link) &&
-                          !/^tel:/i.test(link)
-                            ? `https://${link}`
-                            : link;
-
-                        return (
-                          <React.Fragment key={dkey}>
-                            {column?.header !== "name" &&
-                            column?.header !== "action" &&
-                            column?.header !== "suppliers_delivery" &&
-                            column?.header !== "stringArray" ? (
-                              <div className="text-xs text-gray-500 lg:hidden dark:text-light mb-0 wrap-break-word">
-                                <small className="font-bold text-xs uppercase text-[9px]">
-                                  {column?.header}
-                                </small>
-
-                                <br />
-
-                                <div className="flex gap-1 items-center">
-                                  {column?.icon}
-
-                                  {!column?.isHaveLink ||
-                                  isEmptyItem(value, "") === "" ? (
-                                    <span>{valItem}</span>
-                                  ) : (
-                                    <a
-                                      href={externalLink}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="cursor-pointer hover:text-blue-600 hover:underline"
-                                    >
-                                      {valItem}
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                            ) : null}
-                          </React.Fragment>
-                        );
-                      })}
-
-                      {ishaveSubAdd ? (
-                        <>
-                          {item.getVisibleCells().map((bitem, bkey) => {
-                            return bitem?.column?.columnDef?.header ===
-                              "stringArray" ? (
-                              <React.Fragment key={bkey}>
-                                <div className="text-xs text-gray-500 dark:text-light mb-0 wrap-break-word">
-                                  <small className="font-bold text-xs uppercase  text-[9px]">
-                                    {bitem?.column?.columnDef?.label}
+                                <div
+                                  key={column.accessorKey}
+                                  className="text-xs text-gray-500 dark:text-light mb-0 wrap-break-word"
+                                >
+                                  <small className="font-bold text-xs uppercase text-[9px]">
+                                    {column?.header}
                                   </small>
                                   <br />
-                                  <div className="gap-3">
-                                    {arrayContact?.map((gitem, gkey) => {
-                                      return (
-                                        <p key={gkey}>
-                                          {gitem?.contact_name}{" "}
-                                          {`(${gitem?.contact_phone})`}
-                                        </p>
-                                      );
-                                    })}
+                                  <div className="flex gap-1 items-center">
+                                    {column?.icon}
+                                    {!column?.isHaveLink ||
+                                    isEmptyItem(value, "") === "" ? (
+                                      <span>{valItem}</span>
+                                    ) : (
+                                      <a
+                                        href={externalLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="cursor-pointer hover:text-blue-600 hover:underline"
+                                      >
+                                        {valItem}
+                                      </a>
+                                    )}
                                   </div>
                                 </div>
-                              </React.Fragment>
-                            ) : (
-                              ""
-                            );
-                          })}
+                              );
+                            })}
 
-                          {item.getVisibleCells().map((hitem, hkey) => {
-                            return (
-                              <React.Fragment key={hkey}>
-                                {hitem?.column?.columnDef?.header ===
-                                "suppliers_delivery" ? (
-                                  <p className="text-xs text-gray-500 dark:text-light mb-0 wrap-break-word">
-                                    <small className="font-bold text-xs uppercase  text-[9px]">
-                                      {hitem?.column?.columnDef?.label}
-                                    </small>
-                                    <br />
-                                    <span className="flex gap-3">
-                                      {flexRender(
-                                        hitem?.column?.columnDef?.cell,
-                                        hitem?.getContext(),
-                                      )}
-                                    </span>
+                          {ishaveSubAdd && hasContactPersonColumn && (
+                            <div className="text-xs text-gray-500 dark:text-light mb-0 wrap-break-word">
+                              <small className="font-bold text-xs uppercase text-[9px]">
+                                Other Contacts
+                              </small>
+                              <br />
+                              <div className="gap-3">
+                                {arrayContact?.map((gitem, gkey) => (
+                                  <p key={gkey}>
+                                    {gitem?.contact_name}{" "}
+                                    {`(${gitem?.contact_phone})`}
                                   </p>
-                                ) : (
-                                  ""
-                                )}
-                              </React.Fragment>
-                            );
-                          })}
-                        </>
-                      ) : (
-                        ""
-                      )}
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
-                      <p className="m-0!">
-                        Notes:
-                        <span className="ml-1">
-                          {isEmptyItem(rows[index]?.original?.notes, "")}
-                        </span>
-                      </p>
-                    </div>
-                    <InfiniteSubTable
-                      columns={subColumnsTable}
-                      className={`sm:overflow-auto max-h-[calc(93dvh-200px)] min-h-full`}
-                      path={subPath}
-                      data={rows[index]?.original}
-                      setItemEdit={setItemEdit}
-                      isSearch={isSearch}
-                      ishaveSubAdd={ishaveSubAdd}
-                      haveFilterTable={haveFilterTable}
-                      isDefaultMobile={path}
-                      setItemVal={setItemVal}
-                      refetchOnWindowFocus={refetchOnWindowFocus}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                          {ishaveSubAdd && hasDeliveryColumn && (
+                            <p className="text-xs text-gray-500 dark:text-light mb-0 wrap-break-word">
+                              <small className="font-bold text-xs uppercase text-[9px]">
+                                Delivery
+                              </small>
+                              <br />
+                              <span className="flex gap-3">
+                                {isEmptyItem(rowData?.suppliers_delivery, "-")}
+                              </span>
+                            </p>
+                          )}
+
+                          <p className="m-0!">
+                            Notes:
+                            <span className="ml-1">
+                              {isEmptyItem(rowData?.notes, "")}
+                            </span>
+                          </p>
+                        </div>
+
+                        <InfiniteSubTable
+                          columns={subColumnsTable}
+                          className={`sm:overflow-auto max-h-[calc(93dvh-200px)] min-h-full`}
+                          path={subPath}
+                          data={rowData}
+                          setItemEdit={setItemEdit}
+                          isSearch={isSearch}
+                          ishaveSubAdd={ishaveSubAdd}
+                          haveFilterTable={haveFilterTable}
+                          isDefaultMobile={path}
+                          setItemVal={setItemVal}
+                          refetchOnWindowFocus={refetchOnWindowFocus}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
+
+            {/* Infinite-scroll sentinel - kept in normal flow (not
+            hidden/table-row toggled per breakpoint like the rows above) so
+            IntersectionObserver can actually measure it at any viewport
+            width. */}
+            {rows?.length > 0 && (
+              <tr ref={lastRowRef}>
+                <td colSpan="100%" className="p-0! h-px border-0!" />
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
       {store.isAction && (
         <ModalAction
           mysqlApiAction={`${apiVersion}/${path}/${dataItem?.path}`}

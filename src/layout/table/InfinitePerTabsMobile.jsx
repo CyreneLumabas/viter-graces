@@ -30,7 +30,7 @@ const InfinitePerTabsMobile = ({
 
           return (
             <React.Fragment key={akey}>
-              {aitem?.column?.columnDef?.header === "name" ? (
+              {aitem?.column?.columnDef?.isMobileTitle ? (
                 <>
                   <div className="min-w-0 ml-3 w-full flex items-center justify-between">
                     <div
@@ -38,7 +38,7 @@ const InfinitePerTabsMobile = ({
                       data-testid="button-open-customer-tab"
                     >
                       <span className="text-sm font-medium text-gray-800 dark:text-light min-w-20">
-                        {rows[index]?.original?.name}
+                        {rowData?.[aitem.column.columnDef.accessorKey]}
                       </span>
                     </div>
                     <div className="flex gap-2 justify-end items-center">
