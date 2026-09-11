@@ -1,16 +1,16 @@
-# Graph Report - viter-graces  (2026-09-11)
+# Graph Report - viter-graces  (2026-09-10)
 
 ## Corpus Check
-- 523 files · ~464,586 words
+- 522 files · ~462,979 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1751 nodes · 5202 edges · 299 communities (266 shown, 33 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 464 edges (avg confidence: 0.85)
+- 1736 nodes · 5166 edges · 302 communities (268 shown, 34 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 454 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `650295d8`
+- Built from commit: `8c7d11a8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,7 +26,7 @@
 - ActivityLogDetailsModal.jsx
 - logError
 - checkQuery
-- stock-overview/functions.php
+- useDarkMode
 - sales-order/functions.php
 - ReportSalesOrder
 - checkExistence
@@ -36,7 +36,7 @@
 - Suppliers
 - Customer
 - Role
-- config.jsx
+- useQueryData
 - SuppliersProduct
 - product-owner/functions.php
 - SuppliersPurchaseOrder
@@ -49,10 +49,12 @@
 - user/functions.php
 - SuppliersPurchaseMovement
 - activity-log/functions.php
+- customer/functions.php
 - developer/returns/functions.php
 - Response
 - AccountPayable
 - getResultData
+- config.jsx
 - CashSales
 - Expenses
 - FinanceReturns
@@ -68,13 +70,15 @@
 - expenses-report.cy.js
 - sales-reports.cy.js
 - Dotenv\Dotenv
-- App.jsx
+- InfiniteSubTable.jsx
+- apiVersion
 - suppliers/functions.php
 - purchase-order/functions.php
+- .setOAuth
 
 ## God Nodes (most connected - your core abstractions)
-1. `logError()` - 289 edges
-2. `checkQuery()` - 152 edges
+1. `logError()` - 284 edges
+2. `checkQuery()` - 147 edges
 3. `isEmptyItem()` - 124 edges
 4. `PHPMailer` - 116 edges
 5. `StoreContext` - 110 edges
@@ -91,31 +95,31 @@
   rest/v1/controllers/developer/activity-log/functions.php → rest/v1/core/functions.php
 - `checkCreateOtherSupplier()` --calls--> `checkQuery()`  [INFERRED]
   rest/v1/controllers/developer/activity-log/functions.php → rest/v1/core/functions.php
-- `checkReadAllOverdueBalance()` --calls--> `checkQuery()`  [INFERRED]
+- `isUserAccountAssociated()` --calls--> `checkExistence()`  [INFERRED]
   rest/v1/controllers/developer/customer/functions.php → rest/v1/core/functions.php
-- `checkReadAllOpenBalance()` --calls--> `checkQuery()`  [INFERRED]
+- `checkReadAllOverdueBalance()` --calls--> `checkQuery()`  [INFERRED]
   rest/v1/controllers/developer/customer/functions.php → rest/v1/core/functions.php
 
 ## Import Cycles
 - 4-file cycle: `src/layout/mobile-responsive/ActivityLogMobileResponsive.jsx -> src/pages/developer/reports/activity-log/ActivityLog.jsx -> src/layout/table/InfiniteTable.jsx -> src/layout/mobile-responsive/MobileResponsiveList.jsx -> src/layout/mobile-responsive/ActivityLogMobileResponsive.jsx`
 
-## Communities (299 total, 33 thin omitted)
+## Communities (302 total, 34 thin omitted)
 
 ### Community 0 - "StoreContext.jsx"
 Cohesion: 0.09
-Nodes (76): DateFormat(), InputPhotoUpload(), AmountRangeFilter(), DateRangeFilter(), dateRangeLabel(), MultiRangeAmountFilter(), MultiRangeDateFilter(), nextRangeId() (+68 more)
+Nodes (72): App(), InputPhotoUpload(), AmountRangeFilter(), DateRangeFilter(), dateRangeLabel(), MultiRangeAmountFilter(), MultiRangeDateFilter(), nextRangeId() (+64 more)
 
 ### Community 1 - "isEmptyItem"
-Cohesion: 0.10
-Nodes (75): ExportCSVButton(), ModalButton(), InputCheckbox(), InputRadioButton(), DefaultInputSelectTagArray(), InputSalesOrderSelectTagArray(), InputSelectArray(), InputSelectArrayWithOptions() (+67 more)
+Cohesion: 0.09
+Nodes (76): ExportCSVButton(), ModalButton(), InputCheckbox(), InputRadioButton(), DefaultInputSelectTagArray(), InputSalesOrderSelectTagArray(), InputSelectArray(), InputSelectArrayWithOptions() (+68 more)
 
 ### Community 2 - "CreatePassword.jsx"
-Cohesion: 0.08
-Nodes (39): LogoFull(), LogoFullSm(), InputLogin(), ButtonSpinner(), FetchingSpinner(), ScreenSpinner(), devNavUrl, isDemoMode (+31 more)
+Cohesion: 0.09
+Nodes (38): LogoFull(), LogoFullSm(), InputLogin(), ButtonSpinner(), FetchingSpinner(), ScreenSpinner(), devNavUrl, isDemoMode (+30 more)
 
 ### Community 3 - "MobileResponsiveList.jsx"
-Cohesion: 0.08
-Nodes (46): ActionButton(), AmountsWithPesoSign(), AmountWithPesoSign(), PesoSign(), Pills(), ActionButtonMobile(), ActionButtonSubTable(), variantsStatus() (+38 more)
+Cohesion: 0.07
+Nodes (51): ActionButton(), CloseButton(), ExportModal(), AmountsWithPesoSign(), AmountWithPesoSign(), Pills(), ExportProgressWidget(), ActionButtonMobile() (+43 more)
 
 ### Community 4 - "returnError"
 Cohesion: 0.06
@@ -130,8 +134,8 @@ Cohesion: 0.07
 Nodes (8): Exception, SMTP, sendEmail(), getHtmlResetPassword(), getHtmlVerifyAccount(), getHtmlVerifyEmail(), sendEmail(), sendEmailVerify()
 
 ### Community 8 - "ActivityLogDetailsModal.jsx"
-Cohesion: 0.09
-Nodes (44): ActivityLogMobileResponsive(), activityActionPillClass(), ActivityLogDetailsModal(), ArrayOfObjectsCards(), BOOLEAN_LIKE_VALUES, BooleanPill(), buildReturnSummary(), canonicalizeKey() (+36 more)
+Cohesion: 0.10
+Nodes (42): ActivityLogDetailsModal(), ArrayOfObjectsCards(), BOOLEAN_LIKE_VALUES, BooleanPill(), buildReturnSummary(), canonicalizeKey(), cleanEntries(), DetailValue() (+34 more)
 
 ### Community 9 - "logError"
 Cohesion: 0.06
@@ -141,21 +145,21 @@ Nodes (3): logError(), Returns, SalesOrder
 Cohesion: 0.09
 Nodes (39): checkReadExpensesPerMonth(), checkReadExpensesPerWeek(), checkReadExpensesPerYear(), checkReadSalesPerMonth(), checkReadSalesPerWeek(), checkReadSalesPerYear(), checkReadAllAP(), checkReadAllAR() (+31 more)
 
-### Community 11 - "stock-overview/functions.php"
-Cohesion: 0.33
-Nodes (4): checkReadAllLowStock(), checkReadByUserIdLowStock(), checkReadCountLowStock(), isUserAccountAssociated()
+### Community 11 - "useDarkMode"
+Cohesion: 0.17
+Nodes (15): dashboardData, DashboardOverview(), salesData, GraphTooltip(), PesoSign(), ProfitLossChart(), profitLossData, SalesVsExpensesVsProfit() (+7 more)
 
 ### Community 12 - "sales-order/functions.php"
 Cohesion: 0.08
 Nodes (29): checkCreateInstallment(), checkCreateMovementStock(), checkCreateSalesJornal(), checkCreateSalesJournalRemoved(), checkDeleteById(), checkDeleteInstallment(), checkDeleteinstallmentById(), checkDeleteSalesJournal() (+21 more)
 
 ### Community 14 - "checkExistence"
-Cohesion: 0.07
-Nodes (19): checkReadAllActive(), checkReadAllOpenBalance(), checkReadAllOverdueBalance(), checkReadWalkInCustomer(), isUserAccountAssociated(), checkReadAllLocation(), isUserAccountAssociated(), isAssociatedWithOtherModule() (+11 more)
+Cohesion: 0.08
+Nodes (18): checkReadAllLocation(), isUserAccountAssociated(), checkReadAllLowStock(), checkReadByUserIdLowStock(), checkReadCountLowStock(), isUserAccountAssociated(), isAssociatedWithOtherModule(), isUserAccountAssociated() (+10 more)
 
-### Community 23 - "config.jsx"
-Cohesion: 0.06
-Nodes (64): AddButton(), dashboardData, DashboardOverview(), salesData, FinanceStats(), GraphTooltip(), InputPurchaseOrderSelectTagArray(), InputSelectCustomerArray() (+56 more)
+### Community 23 - "useQueryData"
+Cohesion: 0.15
+Nodes (20): InputPurchaseOrderSelectTagArray(), InputSelectCustomerArray(), InputSelectTagArray(), SearchableSelectFilter(), SearchableSelectModalFilter(), StatCard(), OverviewSalesCustomer(), DashboardExpensesToday() (+12 more)
 
 ### Community 25 - "product-owner/functions.php"
 Cohesion: 0.19
@@ -166,12 +170,16 @@ Cohesion: 0.17
 Nodes (9): checkCreateMovementStock(), checkDeleteMovementStock(), checkReadAllActive(), checkReadAllActiveByName(), checkReadAllCategory(), checkReadAllSku(), checkReadAllThatHaveStock(), checkReadAllUnit() (+1 more)
 
 ### Community 34 - "user/functions.php"
-Cohesion: 0.19
-Nodes (12): checkAssociatedByActivityLog(), checkAssociatedByMenu(), checkAssociatedByProducts(), checkReadGoupByEmail(), checkReadGoupByName(), checkReadGoupByProductOwner(), checkReadGoupByProductOwnerEmail(), checkReadGoupByRole() (+4 more)
+Cohesion: 0.33
+Nodes (7): checkAssociatedByActivityLog(), checkAssociatedByMenu(), checkAssociatedByProducts(), checkResetPasswordByEmail(), checkUpdateActivityLog(), checkUpdateProducts(), updateConnectedMenu()
 
 ### Community 36 - "activity-log/functions.php"
 Cohesion: 0.29
 Nodes (6): checkCreateOtherSupplier(), checkCreateWalkInCustomer(), checkReadByLimit(), createActivityLog(), createActivityLogWithPhp(), checkCreate()
+
+### Community 37 - "customer/functions.php"
+Cohesion: 0.25
+Nodes (5): checkReadAllActive(), checkReadAllOpenBalance(), checkReadAllOverdueBalance(), checkReadWalkInCustomer(), isUserAccountAssociated()
 
 ### Community 39 - "developer/returns/functions.php"
 Cohesion: 0.29
@@ -181,9 +189,17 @@ Nodes (4): checkCreateMovementStock(), checkReadAllActiveByName(), checkReadAllT
 Cohesion: 0.23
 Nodes (11): applyCreditMemoForCollection(), applyOrderPaymentEffects(), checkCreateSalesJornal(), checkReadAllSales(), checkReadLastSalesJournal(), checkUpdateSales(), applyCreditMemoToReturns(), checkReadQuery() (+3 more)
 
-### Community 292 - "App.jsx"
-Cohesion: 0.13
-Nodes (15): App(), CloseButton(), ExportModal(), ExportProgressWidget(), routesCashier, routesAccess, routesAdmin, routesDeveloper (+7 more)
+### Community 43 - "config.jsx"
+Cohesion: 0.11
+Nodes (20): LoadImages(), TableSpinner(), devBaseImgUrl, devBaseUrl, devKey, devWebUrl, googleHDViewLink, googleThumbnailLink (+12 more)
+
+### Community 292 - "InfiniteSubTable.jsx"
+Cohesion: 0.16
+Nodes (15): AddButton(), DateFormat(), SearchBar(), ActiveFilterTagBar(), chipKey(), chipLabel(), wordDate(), InfinitePerTabs() (+7 more)
+
+### Community 293 - "apiVersion"
+Cohesion: 0.30
+Nodes (6): FinanceStats(), SearchableSelectFilterProductOwner(), NoData(), ServerError(), TableLoading(), apiVersion
 
 ### Community 294 - "suppliers/functions.php"
 Cohesion: 0.25
@@ -194,24 +210,24 @@ Cohesion: 0.29
 Nodes (4): checkDeleteById(), checkItemsBelongToSupplier(), checkReadExpensesToday(), isUserAccountAssociated()
 
 ## Knowledge Gaps
-- **26 isolated node(s):** `{ defineConfig }`, `salesData`, `dashboardData`, `profitLossData`, `urlPath` (+21 more)
+- **25 isolated node(s):** `{ defineConfig }`, `salesData`, `dashboardData`, `profitLossData`, `urlPath` (+20 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **34 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `logError()` connect `logError` to `returnError`, `core/functions.php`, `ReportSalesOrder`, `Products`, `ProductOwner`, `User`, `Suppliers`, `Customer`, `Role`, `SuppliersProduct`, `SuppliersPurchaseOrder`, `AccountReceivable`, `StockMovement`, `ActivityLog`, `Overview`, `StockOverview`, `SuppliersPurchaseMovement`, `AccountPayable`, `CashSales`, `Expenses`, `FinanceReturns`, `SalesJournal`?**
   _High betweenness centrality (0.110) - this node is a cross-community bridge._
-- **Why does `checkQuery()` connect `checkQuery` to `user/functions.php`, `activity-log/functions.php`, `core/functions.php`, `suppliers/functions.php`, `developer/returns/functions.php`, `purchase-order/functions.php`, `getResultData`, `stock-overview/functions.php`, `sales-order/functions.php`, `checkExistence`, `purchase-order-movement/functions.php`, `account-payable/functions.php`, `product-owner/functions.php`, `products/functions.php`?**
-  _High betweenness centrality (0.073) - this node is a cross-community bridge._
+- **Why does `checkQuery()` connect `checkQuery` to `user/functions.php`, `activity-log/functions.php`, `customer/functions.php`, `suppliers/functions.php`, `developer/returns/functions.php`, `purchase-order/functions.php`, `core/functions.php`, `getResultData`, `sales-order/functions.php`, `checkExistence`, `purchase-order-movement/functions.php`, `account-payable/functions.php`, `product-owner/functions.php`, `products/functions.php`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Why does `returnError()` connect `returnError` to `SuppliersPurchaseMovement`, `core/functions.php`, `purchase-order/functions.php`, `logError`, `AccountReceivable`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
-- **Are the 288 inferred relationships involving `logError()` (e.g. with `.create()` and `.delete()`) actually correct?**
-  _`logError()` has 288 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 123 inferred relationships involving `checkQuery()` (e.g. with `checkCreateOtherSupplier()` and `checkCreateWalkInCustomer()`) actually correct?**
-  _`checkQuery()` has 123 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Are the 283 inferred relationships involving `logError()` (e.g. with `.create()` and `.delete()`) actually correct?**
+  _`logError()` has 283 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 118 inferred relationships involving `checkQuery()` (e.g. with `checkCreateOtherSupplier()` and `checkCreateWalkInCustomer()`) actually correct?**
+  _`checkQuery()` has 118 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `{ defineConfig }`, `salesData`, `dashboardData` to the rest of the system?**
-  _26 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _25 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `StoreContext.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.09136477557530188 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09471899224806202 - nodes in this community are weakly interconnected._

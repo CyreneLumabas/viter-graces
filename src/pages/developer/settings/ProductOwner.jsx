@@ -34,14 +34,32 @@ const ProductOwner = () => {
       header: "name",
       classTh: "min-w-40",
       classTd: "",
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=product-owner`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "user_account_email",
       header: "email",
       classTh: "min-w-40",
       classTd: "",
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=product-owner-email`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "action",

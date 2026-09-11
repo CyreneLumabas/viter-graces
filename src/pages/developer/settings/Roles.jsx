@@ -26,23 +26,22 @@ const Roles = () => {
         ),
       },
       status_option: ActiveInActiveStatus(),
-      // filterFn: "between",
-      // meta: {
-      //   filterComponent: (column) => <InputMaxMinValue column={column} />,
-      // },
     },
     {
       accessorKey: "role_name",
       header: "Role",
       classTh: "w-[15rem]! p-0!",
       classTd: "",
-      meta: "",
-      // filterFn: "equals",
-      // meta: {
-      //   filterComponent: (column) => (
-      //     <SearchableSelectFilter column={column} options={statusOptions} />
-      //   ),
-      // },
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=role`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
       isMobileTitle: true,
     },
 

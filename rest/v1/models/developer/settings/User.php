@@ -21,6 +21,7 @@ class User
     public $tblUserAccount;
     public $tblActivityLog;
     public $tblProducts;
+    public $tblRole;
 
     public $filters;
     public $column_start;
@@ -35,6 +36,7 @@ class User
         $this->tblUserAccount = "graces_user_account";
         $this->tblActivityLog = "graces_activity_log";
         $this->tblProducts = "graces_products";
+        $this->tblRole = "graces_roles";
     }
 
     // Builds the "columnFilters" WHERE fragments shared by every read*()
@@ -86,7 +88,7 @@ class User
             } elseif (is_array($value)) {
                 $selectedValues = array_values(array_filter(
                     $value,
-                    fn ($v) => trim((string) $v) !== ""
+                    fn($v) => trim((string) $v) !== ""
                 ));
 
                 if (empty($selectedValues)) {
@@ -680,6 +682,130 @@ class User
             $query->execute([
                 "products_owner_id" => $this->user_account_aid,
             ]);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+        return $query;
+    }
+
+    // read all
+    public function readGoupByProductOwner($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "CONCAT(user_account_first_name, ' ', user_account_last_name) as name ";
+            $sql .= "from {$this->tblUserAccount} ";
+            $sql .= " where user_account_role = 'Product Owner' ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by CONCAT(user_account_first_name, ' ', user_account_last_name) ";
+            $sql .= " order by CONCAT(user_account_first_name, ' ', user_account_last_name) asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readGoupByProductOwnerEmail($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "user_account_email as name ";
+            $sql .= "from {$this->tblUserAccount} ";
+            $sql .= " where user_account_role = 'Product Owner' ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by user_account_email ";
+            $sql .= " order by user_account_email asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readGoupByName($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "CONCAT(user_account_first_name, ' ', user_account_last_name) as name ";
+            $sql .= "from {$this->tblUserAccount} ";
+            $sql .= " where true ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by CONCAT(user_account_first_name, ' ', user_account_last_name) ";
+            $sql .= " order by CONCAT(user_account_first_name, ' ', user_account_last_name) asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readGoupByEmail($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "user_account_email as name ";
+            $sql .= "from {$this->tblUserAccount} ";
+            $sql .= " where true ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by user_account_email ";
+            $sql .= " order by user_account_email asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
+        } catch (PDOException $ex) {
+            logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
+            $query = false;
+        }
+
+        return $query;
+    }
+
+    // read all
+    public function readGoupByRole($allowedColumns)
+    {
+        $params = [];
+        $filterColumn = $this->buildFilterColumns($allowedColumns, $params);
+        try {
+            $sql = "select ";
+            $sql .= "role_name as name ";
+            $sql .= "from {$this->tblRole} ";
+            $sql .= " where role_code != 'r_is_developer' ";
+            if (!empty($filterColumn)) {
+                $sql .= " and " . implode(" and ", $filterColumn);
+            }
+            $sql .= " group by role_name ";
+            $sql .= " order by role_name asc ";
+            $query = $this->connection->prepare($sql);
+            $query->execute($params);
         } catch (PDOException $ex) {
             logError($ex->getMessage(), $ex->getFile(), ['line' => $ex->getLine(), 'code' => $ex->getCode()]);
             $query = false;

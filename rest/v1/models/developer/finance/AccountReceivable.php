@@ -345,8 +345,26 @@ class AccountReceivable
             or sales_order_product_name like :sales_order_product_name ) " : " ");
             }
             $sql .= " group by sales_order_number ";
-            $sql .= " order by days_overdue desc, ";
-            $sql .= "DATE(sales_order_due_date) desc, ";
+            // Priority 1: status rank (Due Soon > Due Tomorrow > Due Today >
+            // Pending > Overdue > Partial > anything else) - references the
+            // status_text alias computed above, not the raw column.
+            // Priority 2: due date ascending (earliest first); a null due
+            // date (flexible installment plans - see installmentDetails())
+            // is pushed to the end rather than sorting first. Table-qualified
+            // to read the raw date, since sales_order_due_date is re-aliased
+            // above to its DATE_FORMAT()'d display string.
+            // Priority 3: order number, alphanumeric ascending.
+            $sql .= " order by ";
+            $sql .= "CASE status_text ";
+            $sql .= "WHEN 'Due Soon' THEN 1 ";
+            $sql .= "WHEN 'Due Tomorrow' THEN 2 ";
+            $sql .= "WHEN 'Due Today' THEN 3 ";
+            $sql .= "WHEN 'Pending' THEN 4 ";
+            $sql .= "WHEN 'Overdue' THEN 5 ";
+            $sql .= "WHEN 'Partial' THEN 6 ";
+            $sql .= "ELSE 7 END asc, ";
+            $sql .= "({$this->tblSalesOrder}.sales_order_due_date IS NULL) asc, ";
+            $sql .= "{$this->tblSalesOrder}.sales_order_due_date asc, ";
             $sql .= "sales_order_number asc ";
             $sql .= "limit :start, ";
             $sql .= ":total ";

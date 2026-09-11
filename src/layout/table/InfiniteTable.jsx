@@ -67,6 +67,12 @@ const InfiniteTable = ({
   ishaveAdd = true,
   ishaveSubAdd = false,
   dataTestidAddButton,
+  // Optional (a, b) comparator applied to the flattened, fetched rows before
+  // they're handed to the table - a page-specific default order layered on
+  // top of whatever the backend already returns, without touching every
+  // other table that uses this component. A user-initiated column-header
+  // sort (the `sorting` state below) still takes priority over this.
+  sortComparator = null,
   refetchOnWindowFocus = false,
 }) => {
   const { store, dispatch } = React.useContext(StoreContext);
@@ -173,8 +179,9 @@ const InfiniteTable = ({
   const pages = result?.pages;
 
   const tableData = useMemo(() => {
-    return pages?.flatMap((page) => page.data ?? []) ?? [];
-  }, [pages]);
+    const flattened = pages?.flatMap((page) => page.data ?? []) ?? [];
+    return sortComparator ? [...flattened].sort(sortComparator) : flattened;
+  }, [pages, sortComparator]);
 
   const lastRowRef = useCallback(
     (node) => {

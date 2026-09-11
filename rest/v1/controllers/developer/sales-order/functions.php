@@ -273,50 +273,35 @@ function checkUpdateSalesJournalRemovedByOrderId($object)
     return $query;
 }
 
-// Update 
+// Update
 function updateStatus($val, $data)
 {
-    // DEFAULT VALUE
-    $val->sales_order_status = 'paid';
     $installmentData = $data["installmentItems"];
-    $val->sales_order_paid_amount = $val->sales_order_paid_amount;
     $val->sales_order_total_receivable_amount = $data["sales_order_total_receivable_amount"];
 
-    //  IF THE PAYMENT IS PARTIAL AND HAVE INSTALLMENT DATA
-    if ((float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount) {
-        $val->sales_order_status = 'partial';
-    }
-    //  IF THE PAYMENT IS 0, NEGATIVE OR INSTALLMENT
-    if ((float)$val->sales_order_paid_amount == 0) {
-        $val->sales_order_status = 'unpaid';
-    }
-    if ((float)$val->sales_order_paid_amount == 0 && count($installmentData) == 0) {
-        $val->sales_order_status = 'unpaid';
-    }
+    $paid = (float)$val->sales_order_paid_amount;
+    $total = (float)$val->sales_order_total_receivable_amount;
+    $balance = $total - $paid;
+    $hasInstallments = count($installmentData) > 0;
+
     // Flexible-plan orders have no due date at all (installmentDetails() nulls
     // it) - there's no fixed schedule to be "overdue" against, since AR tracks
-    // each payment's own due date instead. Skip the due-date-based checks
-    // below for them rather than treating a blank due date as overdue.
-    if ($val->sales_order_due_date != "" && $val->sales_order_due_date !== null) {
-        //  IF THE PAYMENT IS PARTIAL BUT NO INSTALLMENT DATA
-        if (
-            (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
-            && count($installmentData) == 0
-        ) {
-            $val->sales_order_status = 'overdue';
-        }
+    // each payment's own due date instead.
+    $hasDueDate = $val->sales_order_due_date != "" && $val->sales_order_due_date !== null;
+    if ($hasDueDate) {
+        $val->sales_order_due_date = date("Y-m-d", strtotime($val->sales_order_due_date));
+    }
 
-        $due_date = date('Y-m-d');
-        $timestamp = strtotime($val->sales_order_due_date);
-        $val->sales_order_due_date = date("Y-m-d", $timestamp);
-
-        //  IF THE NEXT DUEDATE IS IN NEXT 3 DAY
-        if (
-            $val->sales_order_due_date <= $due_date &&
-            (float)$val->sales_order_paid_amount < (float)$val->sales_order_total_receivable_amount
-        ) {
-            $val->sales_order_status = 'overdue';
-        }
+    // Ranked precedence, highest first - PAID > OVERDUE > PARTIAL > UNPAID.
+    if ($balance <= 0) {
+        $val->sales_order_status = 'paid';
+    } elseif ($hasDueDate && !$hasInstallments && $val->sales_order_due_date < date('Y-m-d')) {
+        // Strictly *past* due date only - an order due today is not yet overdue.
+        $val->sales_order_status = 'overdue';
+    } elseif ($paid > 0) {
+        $val->sales_order_status = 'partial';
+    } else {
+        $val->sales_order_status = 'unpaid';
     }
 
     return;

@@ -1151,7 +1151,7 @@ class ReportSalesOrder
             $sql .= "installment_payment_code_number as name ";
             $sql .= "from {$this->tblinstallmentPayment} ";
             $sql .= "where installment_payment_is_paid = '0' ";
-            $sql .= "and DATE(installment_payment_due_date) <= DATE(:due_date) ";
+            $sql .= "and DATE(installment_payment_due_date) < DATE(:due_date) ";
             if (!empty($filterColumn)) {
                 $sql .= " and " . implode(" and ", $filterColumn);
             } else {
@@ -1192,7 +1192,7 @@ class ReportSalesOrder
             $sql .= "installment_payment_code_number as name ";
             $sql .= "from {$this->tblinstallmentPayment} ";
             $sql .= "where installment_payment_is_paid = '0' ";
-            $sql .= "and DATE(installment_payment_due_date) <= DATE(:due_date) ";
+            $sql .= "and DATE(installment_payment_due_date) < DATE(:due_date) ";
             if (!empty($filterColumn)) {
                 $sql .= " and " . implode(" and ", $filterColumn);
             } else {
@@ -1223,7 +1223,7 @@ class ReportSalesOrder
             $sql .= "installment_payment_code_number as name ";
             $sql .= "from {$this->tblinstallmentPayment} ";
             $sql .= "where installment_payment_is_paid = '0' ";
-            $sql .= "and DATE(installment_payment_due_date) <= DATE(:due_date) ";
+            $sql .= "and DATE(installment_payment_due_date) < DATE(:due_date) ";
             $sql .= " order by DATE(installment_payment_due_date) desc ";
             $sql .= "limit :total ";
             $query = $this->connection->prepare($sql);

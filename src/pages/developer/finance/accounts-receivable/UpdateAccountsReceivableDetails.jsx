@@ -12,6 +12,7 @@ import {
 } from "@/store/StoreAction";
 import { StoreContext } from "@/store/StoreContext";
 import useQueryData from "@/services/useQueryData";
+import { formatDate } from "@/utilities/formatDate";
 import { handleEscape } from "@/utilities/handleEscape";
 import { isEmptyItem } from "@/utilities/isEmptyItem";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -91,6 +92,14 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
   // row at a time instead.
   const isFlexibleInstallment =
     itemEdit?.sales_order_installment_type?.toLowerCase() === "flexible";
+
+  // Installment Type is only meaningful (and only shown) when Payment terms
+  // is "Installment" - a static attribute of the order, set from the Sales
+  // Order modal, so it's shown here read-only rather than editable.
+  const installmentType = isEmptyItem(
+    itemEdit?.sales_order_installment_type,
+    "",
+  );
 
   const [newInstallments, setNewInstallments] = React.useState([]);
 
@@ -247,11 +256,15 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     0,
   );
 
-  // Paid Amount is only freely editable for non-installment terms. For a true
-  // installment plan, each due-date row must be paid in full for its scheduled
-  // amount - no partial/custom amounts.
   const isInstallment =
     itemEdit?.sales_order_payment_terms?.toLowerCase() === "installment";
+
+  // Paid Amount is only locked to a fixed scheduled amount for a true FIXED
+  // installment plan (Weekly/Monthly - a real generated schedule). Everything
+  // else - non-installment terms and Flexible installment alike - shares the
+  // same open/flexible payment logging: free-entry amounts, add-payment-as-you-go.
+  const isFixedInstallment = isInstallment && !isFlexibleInstallment;
+  const useUnifiedPaymentFlow = !isFixedInstallment;
 
   // "mutiple payment" is no longer selectable (its split-breakdown UI was
   // removed as redundant) - normalize any pre-existing row still carrying
@@ -320,7 +333,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
   // Installment rows (single method) are locked to the row's own scheduled
   // amount - not user-entered.
   const getEnteredAmount = (a) => {
-    if (isInstallment) {
+    if (isFixedInstallment) {
       return (
         Number(a?.installment_payment_paid_amount || 0) +
         Number(a?.entered_amount || 0)
@@ -330,7 +343,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
   };
 
   const getEnteredAmountForBalance = (a) => {
-    if (isInstallment) {
+    if (isFixedInstallment) {
       return (
         Number(a?.installment_payment_amount || 0) +
         Number(a?.entered_amount || 0)
@@ -351,7 +364,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
   // Flexible mode never has a pre-generated schedule - a row with no due
   // date is stale/legacy data, not a real payment to act on, so it's kept
   // out of the table entirely rather than shown as a blank row.
-  const visibleItems = isFlexibleInstallment
+  const visibleItems = useUnifiedPaymentFlow
     ? items?.filter((a) => !!a?.installment_payment_due_date)
     : items;
 
@@ -444,6 +457,62 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
     });
   };
 
+  // CSV reflects exactly what's on screen: the header summary above the
+  // table plus one row per already-recorded payment (unpaid/draft rows
+  // aren't "recorded" yet, so they're excluded).
+  const handleExportCSV = () => {
+    const csvEscape = (value) => {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+
+    const currentTotalPaid =
+      Number(totalPaidAmount) +
+      Number(paidAmount) +
+      Number(newInstallmentsPaidTotal);
+    const currentBalance = Math.max(
+      0,
+      Number(totalBalanceAmount) -
+        Number(paidAmount) -
+        Number(newInstallmentsPaidTotal),
+    );
+
+    const rows = [
+      ["Order #", itemEdit?.sales_order_number],
+      ["Customer Name", itemEdit?.sales_order_customer_name],
+      ["Order Date", itemEdit?.sales_order_date],
+      ["Payment Terms", itemEdit?.sales_order_payment_terms],
+      ...(isInstallment ? [["Installment Type", installmentType]] : []),
+      ["Total Amount", Number(totalAmount).toFixed(2)],
+      ["Total Paid", currentTotalPaid.toFixed(2)],
+      ["Remaining Balance", currentBalance.toFixed(2)],
+      [],
+      ["Payment #", "Payment Date", "Paid Amount", "Payment Method"],
+      ...(items || [])
+        .filter((item) => Number(item?.installment_payment_is_paid) === 1)
+        .map((item, index) => [
+          index + 1,
+          formatDate(item?.installment_payment_due_date),
+          Number(item?.installment_payment_paid_amount || 0).toFixed(2),
+          item?.installment_payment_method || "",
+        ]),
+    ];
+
+    const csvContent = rows
+      .map((row) => row.map(csvEscape).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Order_Details_${itemEdit?.sales_order_number}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <ModalWrapper
       label={`Order Details - ${itemEdit?.sales_order_number}`}
@@ -473,10 +542,20 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
           {itemEdit?.sales_order_payment_terms}
         </p>
       </div>
+      {isInstallment ? (
+        <div className="flex">
+          <p className="mr-1">Installment Type:</p>
+          <p className="text-black dark:text-light capitalize">
+            {installmentType}
+          </p>
+        </div>
+      ) : (
+        ""
+      )}
 
       <div className="flex justify-between items-center mt-3 mb-1">
         <label></label>
-        {isFlexibleInstallment ? (
+        {useUnifiedPaymentFlow ? (
           <button
             type="button"
             className="cursor-pointer flex items-center justify-center text-dark gap-2 px-3 py-3 bg-transparent rounded-md border-gray-300 border min-w-20 hover:bg-primary transition-all duration-300 ease-in-out hover:text-light dark:text-light"
@@ -496,9 +575,9 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
               <tr className="sm:table-row sticky top-0 uppercase dark:bg-[#0b111e] border-0! ">
                 <th className="w-px dark:bg-gray-900! bg-gray-100!">#</th>
                 <th className={`min-w-40  dark:bg-gray-900! bg-gray-100!`}>
-                  {isFlexibleInstallment ? "Date" : "Due Date"}
+                  {useUnifiedPaymentFlow ? "Date" : "Due Date"}
                 </th>
-                {!isFlexibleInstallment ? (
+                {!useUnifiedPaymentFlow ? (
                   <th className={` dark:bg-gray-900! bg-gray-100!`}>Amount</th>
                 ) : (
                   ""
@@ -529,9 +608,9 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                         {visibleIndex + 1}.
                       </td>
                       <td className=" dark:bg-gray-900! ">
-                        {a?.installment_payment_due_date}
+                        {formatDate(a?.installment_payment_due_date)}
                       </td>
-                      {!isFlexibleInstallment ? (
+                      {!useUnifiedPaymentFlow ? (
                         <td className=" dark:bg-gray-900! ">
                           <AmountWithPesoSign
                             classN="size-3"
@@ -544,7 +623,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
                       {isUnpaid ? (
                         <>
                           <td className=" dark:bg-gray-900! ">
-                            {isInstallment ? (
+                            {isFixedInstallment ? (
                               // Installment terms: Paid Amount is fixed to the
                               // scheduled amount for this due date - no free input.
                               <AmountWithPesoSign
@@ -717,7 +796,7 @@ const UpdateAccountsReceivableDetails = ({ itemEdit }) => {
           />
         </span>
       </div>
-      <ExportCSVButton />
+      <ExportCSVButton onClick={handleExportCSV} />
     </ModalWrapper>
   );
 };

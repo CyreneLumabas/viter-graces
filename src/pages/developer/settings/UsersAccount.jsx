@@ -34,21 +34,48 @@ const UsersAccount = () => {
       classTh: "min-w-40",
       classTd: "",
       isMobileTitle: true,
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=name`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "user_account_email",
       header: "Email",
       classTh: "min-w-40",
       classTd: "",
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=email`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "user_account_role",
       header: "Role",
       classTh: "min-w-40",
       classTd: "",
-      meta: "",
+      filterFn: "multiSelect",
+      meta: {
+        filterComponent: (column) => (
+          <MultiSelectCheckboxFilter
+            column={column}
+            path={`users/read-group-by-filer?type=role`}
+            testFilterId={"filter-status"}
+          />
+        ),
+      },
     },
     {
       accessorKey: "action",

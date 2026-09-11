@@ -19,6 +19,17 @@ const FinanceARMobileResponsive = ({
           {rows?.map((row, index) => {
             const rowData = row.original;
 
+            // Flexible installment plans have no fixed schedule - matches
+            // the desktop table's identical check (AccountsReceivable.jsx's
+            // Due date column) and SalesOrders.jsx's due-date column.
+            const paymentTerms = rowData?.sales_order_payment_terms?.toLowerCase();
+            const installmentType =
+              rowData?.sales_order_installment_type?.toLowerCase();
+            const isFlexible =
+              paymentTerms === "installment" &&
+              (["flexible", "customize"].includes(installmentType) ||
+                !rowData?.sales_order_due_date);
+
             return (
               <div
                 key={row.id}
@@ -52,7 +63,12 @@ const FinanceARMobileResponsive = ({
                       </span>
                     </li>
                     <li className="text-left mb-0">
-                      Due Date: {rowData?.sales_order_due_date}
+                      Due Date:{" "}
+                      {isFlexible ? (
+                        <Pills variant="flexible">Flexible</Pills>
+                      ) : (
+                        rowData?.sales_order_due_date
+                      )}
                     </li>
                   </ul>
                 </div>

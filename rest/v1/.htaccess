@@ -38,6 +38,7 @@ RewriteRule ^users/token$ controllers/developer/settings/user/token.php [L]
 RewriteRule ^users/login$ controllers/developer/settings/user/login.php [L]
 RewriteRule ^users/reset-password/([0-9]+)$ controllers/developer/settings/user/reset-password.php?id=$1 [L] 
 RewriteRule ^users/forget-password$ controllers/developer/settings/user/forget-password.php [L] 
+RewriteRule ^users/read-group-by-filer$ controllers/developer/settings/user/read-group-by-filer.php [L] 
 
 ### PRODUCT OWNER ###
 RewriteRule ^product-owner/([0-9]+)$ controllers/developer/settings/product-owner/product-owner.php?id=$1 [L]
@@ -181,6 +182,5 @@ RewriteRule ^finance-account-payable/account-payable/([0-9]+)$ controllers/devel
 RewriteRule ^finance-sales-journal/page/([0-9]+)$ controllers/developer/finance/sales-journal/page-by-sales-journal.php?start=$1 [L]
 RewriteRule ^finance-sales-journal/read-overview$ controllers/developer/finance/overview/read-overview.php [L]
 RewriteRule ^finance-returns/page/([0-9]+)$ controllers/developer/finance/returns/page-by-finance-returns.php?start=$1 [L]
-  
-
+   
  
