@@ -88,10 +88,8 @@ RewriteRule ^products/page/([0-9]+)$ controllers/developer/products/page.php?sta
 RewriteRule ^products/search$ controllers/developer/products/search.php [L]
 RewriteRule ^products/read-all-active-by-product$ controllers/developer/products/read-all-active-by-product.php [L]
 RewriteRule ^products/read-all-product-that-have-stock$ controllers/developer/products/read-all-product-that-have-stock.php [L]
-RewriteRule ^products/read-all-category$ controllers/developer/products/read-all-category.php [L]
 RewriteRule ^products/read-all-by-active$ controllers/developer/products/read-all-by-active.php [L]
-RewriteRule ^products/read-all-by-sku$ controllers/developer/products/read-all-by-sku.php [L]
-RewriteRule ^products/read-all-by-unit$ controllers/developer/products/read-all-by-unit.php [L]
+RewriteRule ^products/read-all-by-filters$ controllers/developer/products/read-all-by-filters.php [L]
 
 ### ACTIVITY LOG ### 
 RewriteRule ^activity/read-with-limit$ controllers/developer/activity-log/read-with-limit.php [L]

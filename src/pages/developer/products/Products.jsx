@@ -60,7 +60,7 @@ const Products = () => {
         filterComponent: (column) => (
           <MultiSelectCheckboxFilter
             column={column}
-            path="products/read-all-by-sku"
+            path="products/read-all-by-filters?type=sku"
             testFilterId={"filter-product-sku"}
           />
         ),
@@ -76,7 +76,7 @@ const Products = () => {
         filterComponent: (column) => (
           <MultiSelectCheckboxFilter
             column={column}
-            path="products/read-all-category"
+            path="products/read-all-by-filters?type=category"
             testFilterId={"filter-category"}
           />
         ),
