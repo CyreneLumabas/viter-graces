@@ -173,6 +173,7 @@ const InfinitePerTabs = ({
             <tr className="sticky top-0 uppercase dark:bg-[#0b111e] border-0! z-10">
               <th className="w-px">#</th>
               <th className="w-px"></th>
+              <th className="w-px"></th>
               {primaryHeaders?.map((header) => (
                 <th
                   key={header.id}
@@ -230,27 +231,29 @@ const InfinitePerTabs = ({
                     data-testid="table-row"
                   >
                     <td className="text-center">{index + 1}.</td>
+                    <td className="text-center">
+                      <button
+                        type="button"
+                        onClick={toggle}
+                        className="flex items-center justify-center cursor-pointer"
+                        data-testid="button-open-customer-tab"
+                      >
+                        <FaCaretDown
+                          className={`h-4 w-4 text-gray-600 dark:text-light font-bold transition-transform ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                    </td>
                     <td>
                       <TableDefaultStatusDot dataArray={rowData} />
                     </td>
                     {primaryCells.map((cell) =>
                       cell.column.columnDef.isMobileTitle ? (
                         <td key={cell.id}>
-                          <button
-                            type="button"
-                            onClick={toggle}
-                            className="flex items-center gap-2 cursor-pointer hover:underline"
-                            data-testid="button-open-customer-tab"
-                          >
-                            <span className="text-sm font-medium text-gray-800 dark:text-light">
-                              {rowData?.[cell.column.columnDef.accessorKey]}
-                            </span>
-                            <FaCaretDown
-                              className={`h-4 w-4 text-gray-600 dark:text-light font-bold transition-transform ${
-                                isOpen ? "rotate-180" : ""
-                              }`}
-                            />
-                          </button>
+                          <span className="text-sm font-medium text-gray-800 dark:text-light">
+                            {rowData?.[cell.column.columnDef.accessorKey]}
+                          </span>
                         </td>
                       ) : (
                         <td key={cell.id}>

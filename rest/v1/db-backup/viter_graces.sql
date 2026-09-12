@@ -823,6 +823,7 @@ CREATE TABLE `graces_suppliers` (
   `suppliers_notes` text DEFAULT NULL,
   `suppliers_delivery` varchar(20) DEFAULT NULL,
   `suppliers_contact_person` text DEFAULT NULL,
+  `suppliers_description_name` varchar(200) DEFAULT NULL,
   `suppliers_created` datetime NOT NULL,
   `suppliers_updated` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -35,6 +35,7 @@ const Suppliers = () => {
       header: "supplier description",
       icon: "",
       isHaveLink: false,
+      isPrimaryRow: true,
       classTh: "min-w-40",
       classTd: "",
     },

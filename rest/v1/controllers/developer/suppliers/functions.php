@@ -43,6 +43,7 @@ function allowedColumns()
     $query = [
         "suppliers_is_active",
         "suppliers_name",
+        "suppliers_description_name",
         "suppliers_email",
         "suppliers_phone",
         "suppliers_address",

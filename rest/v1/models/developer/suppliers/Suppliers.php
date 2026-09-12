@@ -4,6 +4,7 @@ class Suppliers
     public $suppliers_aid;
     public $suppliers_is_active;
     public $suppliers_name;
+    public $suppliers_description_name;
     public $suppliers_email;
     public $suppliers_phone;
     public $suppliers_address;
@@ -128,6 +129,7 @@ class Suppliers
             $sql = "insert into {$this->tblSuppliers} ";
             $sql .= "( suppliers_is_active, ";
             $sql .= "suppliers_name, ";
+            $sql .= "suppliers_description_name, ";
             $sql .= "suppliers_email, ";
             $sql .= "suppliers_phone, ";
             $sql .= "suppliers_address, ";
@@ -142,6 +144,7 @@ class Suppliers
             $sql .= "suppliers_updated ) values ( ";
             $sql .= ":suppliers_is_active, ";
             $sql .= ":suppliers_name, ";
+            $sql .= ":suppliers_description_name, ";
             $sql .= ":suppliers_email, ";
             $sql .= ":suppliers_phone, ";
             $sql .= ":suppliers_address, ";
@@ -158,6 +161,7 @@ class Suppliers
             $query->execute([
                 "suppliers_is_active" => $this->suppliers_is_active,
                 "suppliers_name" => $this->suppliers_name,
+                "suppliers_description_name" => $this->suppliers_description_name,
                 "suppliers_email" => $this->suppliers_email,
                 "suppliers_phone" => $this->suppliers_phone,
                 "suppliers_address" => $this->suppliers_address,
@@ -403,6 +407,7 @@ class Suppliers
         try {
             $sql = "update {$this->tblSuppliers} set ";
             $sql .= "suppliers_name = :suppliers_name, ";
+            $sql .= "suppliers_description_name = :suppliers_description_name, ";
             $sql .= "suppliers_email = :suppliers_email, ";
             $sql .= "suppliers_phone = :suppliers_phone, ";
             $sql .= "suppliers_address = :suppliers_address, ";
@@ -417,6 +422,7 @@ class Suppliers
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "suppliers_name" => $this->suppliers_name,
+                "suppliers_description_name" => $this->suppliers_description_name,
                 "suppliers_email" => $this->suppliers_email,
                 "suppliers_phone" => $this->suppliers_phone,
                 "suppliers_address" => $this->suppliers_address,

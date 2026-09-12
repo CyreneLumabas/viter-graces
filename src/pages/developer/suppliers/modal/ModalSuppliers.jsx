@@ -138,6 +138,10 @@ const ModalSuppliers = ({ itemEdit }) => {
   };
   const initVal = {
     suppliers_name: isEmptyItem(itemEdit?.suppliers_name, ""),
+    suppliers_description_name: isEmptyItem(
+      itemEdit?.suppliers_description_name,
+      "",
+    ),
     suppliers_email: isEmptyItem(itemEdit?.suppliers_email, ""),
     suppliers_phone: isEmptyItem(itemEdit?.suppliers_phone, ""),
     suppliers_address: isEmptyItem(itemEdit?.suppliers_address, ""),
@@ -237,6 +241,16 @@ const ModalSuppliers = ({ itemEdit }) => {
                         type="text"
                         name="suppliers_address"
                         placeholder={`${itemEdit ? "Update Address" : "Enter Address"}`}
+                        disabled={mutation.isPending}
+                        required={false}
+                      />
+                    </div>
+                    <div className="relative mt-3">
+                      <InputText
+                        label="Description"
+                        type="text"
+                        name="suppliers_description_name"
+                        placeholder={`${itemEdit ? "Update description" : "Enter description"}`}
                         disabled={mutation.isPending}
                         required={false}
                       />

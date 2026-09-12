@@ -17,6 +17,7 @@ if (array_key_exists("id", $_GET)) {
     // get data
     $val->suppliers_aid  = $_GET['id'];
     $val->suppliers_name = checkIndex($data, "suppliers_name");
+    $val->suppliers_description_name = $data["suppliers_description_name"];
     $val->suppliers_email = $data["suppliers_email"];
     $val->suppliers_phone = $data["suppliers_phone"];
     $val->suppliers_address = $data["suppliers_address"];
